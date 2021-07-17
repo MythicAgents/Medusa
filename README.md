@@ -2,7 +2,7 @@
 
 # Medusa
 
-Medusa is a cross-platform agent written in Python 3.8. 
+Medusa is a cross-platform agent compatible with both Python 3.8 and Python 2.7.
 
 ## Installation
 To install Medusa, you'll need Mythic installed on a remote computer. You can find installation instructions for Mythic at the [Mythic project page](https://github.com/its-a-feature/Mythic/).
@@ -42,6 +42,19 @@ shell | `shell [command]` | Run a shell command which will spawn using subproces
 shinject | `shinject` | Inject shellcode into target PID using CreateRemoteThread (Windows only - adapted from [here](https://gist.github.com/RobinDavid/9214020)).
 sleep | `sleep [seconds] [jitter percentage]` | Set the callback interval of the agent in seconds.
 upload | `upload` | Upload a file to a remote path on the machine.
+
+## Python Versions
+
+The Python 3.8 version of the agent uses an AES256 HMAC implementation written with built-in libraries (adapted from [here](https://github.com/boppreh/aes)), removing the need for any additional dependencies beyond a standard install. As such the agent should operate across Windows, Linux and macOS hosts.
+
+Unlike the Python 3.8, the Python 2.7 agent _does_ use an additional dependency to handle encryption, namely the `cryptography` library. This is pre-installed on macOS (on the Big Sur host I tested on at least), so both python versions of the agent should work OOTB.
+
+### Py2 vs Py3 Commands
+
+Within the `Payload_Type/Medusa/agent_code` directory, you will see `base_agent` files with both `py2` and `py3` suffixes. Likewise, similar file extensions can be seen for individual function files too. 
+
+These are read by the `builder.py` script to firstly select the right base Python version of the Medusa agent. `builder.py` will then include commands that are specific to the chosen version. In the case, where a command only has a `.py` extension, this will be used by default, with the assumption being that no alternative code is needed between the Py2 and Py3.
+
 
 ## Supported C2 Profiles
 

@@ -48,7 +48,7 @@ class Medusa(PayloadType):
             return "{}.py".format(file)
         elif pyv == "Python 2.7":
             return "{}.py2".format(file)
-        else:
+        elif pyv == "Python 3.8":
             return "{}.py3".format(file)
 
     async def build(self) -> BuildResponse:
