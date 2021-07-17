@@ -28,6 +28,7 @@ Command | Syntax | Description
 ------- | ------ | -----------
 cat | `cat path/to/file` | Read and output file content.
 cd | `cd [.. dir]` | Change working directory (`..` to go up one directory).
+clipboard | `clipboard` | Output contents of clipboard (uses Objective-C API, as outlined by Cedric Owens [here](https://github.com/cedowens/MacC2/blob/main/client.py#L90). macOS only, Python 2.7 only).
 cp | `cp src_file_or_dir dst_file_or_dir` | Copy file or folder to destination.
 cwd | `cwd` | Print working directory.
 download | `download [path]` | Download a file from the target system.

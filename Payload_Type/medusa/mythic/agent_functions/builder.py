@@ -43,24 +43,35 @@ class Medusa(PayloadType):
 
     def getPythonVersionFile(self, file):
         pyv = self.get_parameter("python_version")
+        filename = ""
         if os.path.exists(os.path.join(self.agent_code_path, "{}.py".format(file))):
             #while we've specified a python version, this function is agnostic so just return the .py
-            return "{}.py".format(file)
+            filename = os.path.join(self.agent_code_path, "{}.py".format(file))
         elif pyv == "Python 2.7":
-            return "{}.py2".format(file)
+            filename = os.path.join(self.agent_code_path, "{}.py2".format(file))
         elif pyv == "Python 3.8":
-            return "{}.py3".format(file)
+            filename = os.path.join(self.agent_code_path, "{}.py3".format(file))
+            
+        if not os.path.exists(filename) or not filename:
+            return ""
+        else:
+            return filename         
 
     async def build(self) -> BuildResponse:
         # this function gets called to create an instance of your payload
         resp = BuildResponse(status=BuildStatus.Success)
         # create the payload
+        build_msg = ""
         try:
             command_code = ""
             for cmd in self.commands.get_commands():
-                command_code += (
-                    open(os.path.join(self.agent_code_path, "{}".format(self.getPythonVersionFile(cmd))), "r").read() + "\n"
-                )
+                command_path = self.getPythonVersionFile(cmd)
+                if not command_path:
+                    build_msg += "{} command not available for {}. Remove from selection or change python version.".format(cmd, self.get_parameter("python_version"))
+                else:
+                    command_code += (
+                        open(command_path, "r").read() + "\n"
+                    )
             base_code = open(
                 os.path.join(self.agent_code_path, self.getPythonVersionFile("base_agent")), "r"
             ).read()
@@ -74,15 +85,19 @@ class Medusa(PayloadType):
                             json.dumps(val).replace("false", "False").replace("true","True").replace("null","None"))
                     else:
                         base_code = base_code.replace(key, val)
+            
+            if build_msg != "":
+                resp.build_stderr = build_msg
+                resp.set_status(BuildStatus.Error)
+
             if self.get_parameter("output") == "base64":
                     resp.payload = base64.b64encode(base_code.encode())
-                    resp.set_message("Successfully Built")
-                    resp.status = BuildStatus.Success
+                    resp.build_message("Successfully Built")
             else:
                 resp.payload = base_code.encode()
-                resp.message = "Successfully built!"
+                resp.build_message = "Successfully built!"
         except Exception as e:
             resp.set_status(BuildStatus.Error)
-            resp.set_message("Error building payload: " + str(e))
+            resp.build_stderr("Error building payload: " + str(e))
         return resp
 

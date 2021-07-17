@@ -1,0 +1,5 @@
+    def clipboard(self, task_id):
+        from Cocoa import NSPasteboard, NSStringPboardType
+        pboard = NSPasteboard.generalPasteboard()
+        pString = pboard.stringForType_(NSStringPboardType)
+        return str(pString).encode('utf8')
