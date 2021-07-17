@@ -45,16 +45,13 @@ upload | `upload` | Upload a file to a remote path on the machine.
 
 ## Python Versions
 
-The Python 3.8 version of the agent uses an AES256 HMAC implementation written with built-in libraries (adapted from [here](https://github.com/boppreh/aes)), removing the need for any additional dependencies beyond a standard install. As such the agent should operate across Windows, Linux and macOS hosts.
-
-Unlike the Python 3.8, the Python 2.7 agent _does_ use an additional dependency to handle encryption, namely the `cryptography` library. This is pre-installed on macOS (on the Big Sur host I tested on at least), so both python versions of the agent should work OOTB.
+Both versions of the Medusa agent use an AES256 HMAC implementation written with built-in libraries (adapted from [here](https://github.com/boppreh/aes)), removing the need for any additional dependencies beyond a standard Python install. As such the agent should operate across Windows, Linux and macOS hosts.
 
 ### Py2 vs Py3 Commands
 
 Within the `Payload_Type/Medusa/agent_code` directory, you will see `base_agent` files with both `py2` and `py3` suffixes. Likewise, similar file extensions can be seen for individual function files too. 
 
-These are read by the `builder.py` script to firstly select the right base Python version of the Medusa agent. `builder.py` will then include commands that are specific to the chosen version. In the case, where a command only has a `.py` extension, this will be used by default, with the assumption being that no alternative code is needed between the Py2 and Py3.
-
+These are read by the `builder.py` script to firstly select the right base Python version of the Medusa agent. `builder.py` will then include commands that are specific to the chosen python version. In the case where a command only has a `.py` extension, this will be used by default, with the assumption being that no alternative code is needed between the Py2 and Py3 versions.
 
 ## Supported C2 Profiles
 
@@ -67,4 +64,5 @@ The HTTP profile calls back to the Mythic server over the basic, non-dynamic pro
 ## Thanks
 
 - Browser scripts and agent code adapted from [@its_a_feature_](https://twitter.com/its_a_feature_) and [@djhohnstein](https://twitter.com/djhohnstein).
+- The crypto wizardry found [here](https://github.com/boppreh/aes).
 - Agent icon from [flaticon.com](https://www.flaticon.com)
