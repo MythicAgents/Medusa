@@ -16,7 +16,7 @@ Once installed, restart Mythic to build a new agent.
 ## Notable Features
 - File browser compatibility with upload/download
 - Windows injection example using CreateRemoteThread
-- maOS TCC database parsing example
+- maOS Clipboard reader, screenshot grabber and TCC database parsing examples
 - Eval() of dynamic Python code
 - Basic Authentication Proxy compatibility
 
@@ -39,6 +39,7 @@ ls | `ls [. path]` | List files and folders in `[path]` or use `.` for current w
 list_tcc | `list_tcc [path]` | List entries in macOS TCC database (requires full-disk access and Big Sur only atm).
 mv | `mv src_file_or_dir dst_file_or_dir` | Move file or folder to destination.
 rm | `rm file_or_dir` | Delete file or folder.
+screenshot | `screenshot` | Take a screenshot (uses Objective-C API, macOS only, Python 2.7 only).
 shell | `shell [command]` | Run a shell command which will spawn using subprocess.Popen(). Note that this will wait for command to complete so be careful not to block your agent.
 shinject | `shinject` | Inject shellcode into target PID using CreateRemoteThread (Windows only - adapted from [here](https://gist.github.com/RobinDavid/9214020)).
 sleep | `sleep [seconds] [jitter percentage]` | Set the callback interval of the agent in seconds.

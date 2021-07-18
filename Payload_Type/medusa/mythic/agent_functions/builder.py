@@ -67,7 +67,7 @@ class Medusa(PayloadType):
             for cmd in self.commands.get_commands():
                 command_path = self.getPythonVersionFile(cmd)
                 if not command_path:
-                    build_msg += "{} command not available for {}. Remove from selection or change python version.".format(cmd, self.get_parameter("python_version"))
+                    build_msg += "{} command not available for {}.\n".format(cmd, self.get_parameter("python_version"))
                 else:
                     command_code += (
                         open(command_path, "r").read() + "\n"
