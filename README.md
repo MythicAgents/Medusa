@@ -16,13 +16,13 @@ Once installed, restart Mythic to build a new agent.
 ## Notable Features
 - File browser compatibility with upload/download
 - Windows injection example using CreateRemoteThread
-- maOS Clipboard reader, screenshot grabber and TCC database parsing examples
+- maOS clipboard reader, screenshot grabber and TCC database parsing examples
 - Eval() of dynamic Python code
 - Basic Authentication Proxy compatibility
 
 ## Commands Manual Quick Reference
 
-The base agent and included commands all use built-in Python libraries, so do not need additional packages to function.
+The base agent and included commands all use built-in Python libraries, so do not need additional packages to function. Agents will run the commands in threads, so long-running uploads or downloads won't block the main agent.
 
 Command | Syntax | Description
 ------- | ------ | -----------
@@ -66,5 +66,6 @@ The HTTP profile calls back to the Mythic server over the basic, non-dynamic pro
 ## Thanks
 
 - Browser scripts and agent code adapted from [@its_a_feature_](https://twitter.com/its_a_feature_) and [@djhohnstein](https://twitter.com/djhohnstein).
+- [MacC2](https://github.com/cedowens/MacC2/) and [this](https://medium.com/red-teaming-with-a-blue-team-mentality/making-objective-c-calls-from-python-standard-libraries-550ed3a30a30) blog posts from Cedric Owens
 - The crypto wizardry found [here](https://github.com/boppreh/aes).
 - Agent icon from [flaticon.com](https://www.flaticon.com)

