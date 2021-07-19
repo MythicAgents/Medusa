@@ -47,7 +47,7 @@ upload | `upload` | Upload a file to a remote path on the machine.
 
 ## Python Versions
 
-Both versions of the Medusa agent use an AES256 HMAC implementation written with built-in libraries (adapted from [here](https://github.com/boppreh/aes)), removing the need for any additional dependencies beyond a standard Python install. As such the agent should operate across Windows, Linux and macOS hosts.
+Both versions of the Medusa agent use an AES256 HMAC implementation written with built-in libraries (adapted from [here](https://github.com/boppreh/aes)), removing the need for any additional dependencies beyond a standard Python install. As such the agent should operate across Windows, Linux and macOS hosts. It's worth mentioning that this crypto implementation does introduce some overhead when handling large files (screenshotting, downloads, etc.) but it's workable.
 
 ### Py2 vs Py3 Commands
 
