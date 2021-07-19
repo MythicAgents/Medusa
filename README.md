@@ -1,4 +1,6 @@
-![Medusa](agent_icons/medusa.svg)
+<p align="center">
+  <img alt="Medusa Logo" src="agent_icons/medusa.svg" height="30%" width="30%">
+</p>
 
 # Medusa
 
