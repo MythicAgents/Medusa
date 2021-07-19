@@ -338,7 +338,7 @@ class medusa:
         taskings = self.taskings     
         for task in taskings:
             if task["started"] == False:
-                x = threading.Thread(target=self.processTask, args=(task,))
+                x = threading.Thread(target=self.processTask, name="{}:{}".format(task["command"], task["task_id"]), args=(task,))
                 threads.append(x)
                 x.start()
 

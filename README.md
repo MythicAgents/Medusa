@@ -37,6 +37,7 @@ download | `download [path]` | Download a file from the target system.
 exit | `exit` | Exit a callback.
 env | `env` | Print environment variables.
 eval | `eval [commands]` | Execute python code and return output.
+jobs | `jobs` | List long-running tasks, such as downloads.
 ls | `ls [. path]` | List files and folders in `[path]` or use `.` for current working directory.
 list_tcc | `list_tcc [path]` | List entries in macOS TCC database (requires full-disk access and Big Sur only atm).
 mv | `mv src_file_or_dir dst_file_or_dir` | Move file or folder to destination.
