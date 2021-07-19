@@ -24,7 +24,11 @@ class ScreenshotCommand(CommandBase):
     attackmapping = ["T1113"]
     argument_class = ScreenshotArguments
     browser_script = BrowserScript(script_name="screenshot", author="@its_a_feature_")
-    supported_os = [SupportedOS.MacOS]
+    attributes = CommandAttributes(
+        supported_os=[
+            SupportedOS.MacOS
+        ]
+    )
 
     async def create_tasking(self, task: MythicTask) -> MythicTask:
         resp = await MythicRPC().execute("create_artifact", task_id=task.id,
