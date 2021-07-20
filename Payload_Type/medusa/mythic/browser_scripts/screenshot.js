@@ -1,7 +1,7 @@
 function(task, responses){    
     if(task.status === 'error'){
-        return "<pre> Error: Untoggle swtich to see error message(s) </pre>";
-      }
+      return "<pre> Error. </pre>";
+    }
     if(task.completed){
         try{
             let status = JSON.parse(responses[0]['response']);
@@ -15,6 +15,6 @@ function(task, responses){
         }
       }
     if(task.status === 'processing' || task.status === "processed"){
-  	    return "<pre> downloading pieces ...</pre>";
+  	    return "<pre> Downloading... </pre>";
       }
 }

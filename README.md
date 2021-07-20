@@ -37,6 +37,7 @@ download | `download [path]` | Download a file from the target system.
 exit | `exit` | Exit a callback.
 env | `env` | Print environment variables.
 eval | `eval [commands]` | Execute python code and return output.
+jobkill | `jobkill [task id]` | Send stop signal to long running task.
 jobs | `jobs` | List long-running tasks, such as downloads.
 ls | `ls [. path]` | List files and folders in `[path]` or use `.` for current working directory.
 list_tcc | `list_tcc [path]` | List entries in macOS TCC database (requires full-disk access and Big Sur only atm).
@@ -57,6 +58,16 @@ Both versions of the Medusa agent use an AES256 HMAC implementation written with
 Within the `Payload_Type/Medusa/agent_code` directory, you will see `base_agent` files with both `py2` and `py3` suffixes. Likewise, similar file extensions can be seen for individual function files too. 
 
 These are read by the `builder.py` script to firstly select the right base Python version of the Medusa agent. `builder.py` will then include commands that are specific to the chosen python version. In the case where a command only has a `.py` extension, this will be used by default, with the assumption being that no alternative code is needed between the Py2 and Py3 versions.
+
+## Threaded Jobs
+
+Medusa uses basic threading for job execution. Where jobs are potentially long-running, they can be implemented with a 'stop check' to respond to a signal from the `jobkill` task. This can be implemented with a code snippet similar to that shown below:
+```
+if [task for task in self.taskings if task["task_id"] == task_id][0]["stopped"]:
+  # Some job-specific tidy up
+  return "Job stopped."
+```
+This handle can be seen implemented within the download, upload and screenshot commands.
 
 ## Supported C2 Profiles
 

