@@ -67,7 +67,16 @@ if [task for task in self.taskings if task["task_id"] == task_id][0]["stopped"]:
   # Some job-specific tidy up
   return "Job stopped."
 ```
-This handle can be seen implemented within the download, upload and screenshot commands.
+This handler can be seen implemented within the download, upload and screenshot commands.
+
+Additionally, if the long-running job is expected to provide continuous output, the `sendTaskOutputUpdate` function can be used to update Mythic prior to the task completion.
+
+```
+def sendTaskOutputUpdate(self, task_id, output):
+  responses = [{ "task_id": task_id, "user_output": output, "completed": False }]
+  message = { "action": "post_response", "responses": responses }
+  response_data = self.postMessageAndRetrieveResponse(message)
+```
 
 ## Supported C2 Profiles
 

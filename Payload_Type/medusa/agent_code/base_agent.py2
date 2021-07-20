@@ -290,6 +290,11 @@ class medusa:
             else: return ""
         else: return data.decode()
 
+    def sendTaskOutputUpdate(self, task_id, output):
+        responses = [{ "task_id": task_id, "user_output": output, "completed": False }]
+        message = { "action": "post_response", "responses": responses }
+        response_data = self.postMessageAndRetrieveResponse(message)
+
     def postResponses(self):
         try:
             responses = []
