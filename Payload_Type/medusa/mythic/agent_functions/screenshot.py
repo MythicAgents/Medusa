@@ -25,12 +25,13 @@ class ScreenshotCommand(CommandBase):
     argument_class = ScreenshotArguments
     browser_script = BrowserScript(script_name="screenshot", author="@its_a_feature_")
     attributes = CommandAttributes(
+        supported_python_versions=["Python 2.7"],
         supported_os=[ SupportedOS.MacOS ]
     )
 
     async def create_tasking(self, task: MythicTask) -> MythicTask:
         resp = await MythicRPC().execute("create_artifact", task_id=task.id,
-            artifact="$.CGDisplayCreateImage($.CGMainDisplayID());, $.NSBitmapImageRep.alloc.initWithCGImage(cgimage);",
+            artifact="CG.CGWindowListCreateImage(region, CG.kCGWindowListOptionOnScreenOnly, CG.kCGNullWindowID, CG.kCGWindowImageDefault)",
             artifact_type="API Called",
         )
         return task

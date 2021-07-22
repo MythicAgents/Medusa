@@ -40,6 +40,11 @@ class UploadCommand(CommandBase):
     author = "@its_a_feature_"
     attackmapping = ["T1132", "T1030", "T1105"]
     argument_class = UploadArguments
+    attributes = CommandAttributes(
+        supported_python_versions=["Python 2.7", "Python 3.8"],
+        supported_os=[SupportedOS.MacOS, SupportedOS.Windows, SupportedOS.Linux ],
+    )
+
 
     async def create_tasking(self, task: MythicTask) -> MythicTask:
         try:

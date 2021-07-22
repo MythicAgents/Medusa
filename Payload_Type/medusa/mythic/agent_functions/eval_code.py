@@ -21,15 +21,16 @@ class EvalArguments(TaskArguments):
 
 
 class EvalCommand(CommandBase):
-    cmd = "eval"
+    cmd = "eval_code"
     needs_admin = False
-    help_cmd = "eval python-code"
+    help_cmd = "eval_code python-code"
     description = "Evaluate python code in interpreter"
     version = 1
     author = "@ajpc500"
     attackmapping = []
     argument_class = EvalArguments
     attributes = CommandAttributes(
+        supported_python_versions=["Python 2.7", "Python 3.8"],
         supported_os=[SupportedOS.MacOS, SupportedOS.Windows, SupportedOS.Linux ],
     )
 

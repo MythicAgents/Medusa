@@ -28,6 +28,7 @@ class JobsCommand(CommandBase):
     attackmapping = []
     browser_script = [BrowserScript(script_name="jobs", author="@ajpc500")]
     attributes = CommandAttributes(
+        supported_python_versions=["Python 2.7", "Python 3.8"],
         supported_os=[SupportedOS.MacOS, SupportedOS.Windows, SupportedOS.Linux ],
     )
 

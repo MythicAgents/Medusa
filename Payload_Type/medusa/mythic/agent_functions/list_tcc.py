@@ -40,6 +40,7 @@ class ListTccCommand(CommandBase):
     argument_class = ListTccArguments
     browser_script = [BrowserScript(script_name="tcc", author="@ajpc500")]
     attributes = CommandAttributes(
+        supported_python_versions=["Python 2.7", "Python 3.8"],
         supported_os=[
             SupportedOS.MacOS
         ],

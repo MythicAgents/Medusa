@@ -41,9 +41,8 @@ class ShinjectCommand(CommandBase):
     attackmapping = [ "T1055" ]
     argument_class = ShinjectArguments
     attributes = CommandAttributes(
-        supported_os=[
-            SupportedOS.Windows
-        ]
+        supported_python_versions=["Python 2.7", "Python 3.8"],
+        supported_os=[ SupportedOS.Windows ]
     )
 
     async def create_tasking(self, task: MythicTask) -> MythicTask:

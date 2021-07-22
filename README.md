@@ -36,9 +36,10 @@ cwd | `cwd` | Print working directory.
 download | `download [path]` | Download a file from the target system.
 exit | `exit` | Exit a callback.
 env | `env` | Print environment variables.
-eval | `eval [commands]` | Execute python code and return output.
+eval_code | `eval_code [commands]` | Execute python code and return output.
 jobkill | `jobkill [task id]` | Send stop signal to long running task.
 jobs | `jobs` | List long-running tasks, such as downloads.
+load | `load command` | Load a new capability into an agent.
 ls | `ls [. path]` | List files and folders in `[path]` or use `.` for current working directory.
 list_tcc | `list_tcc [path]` | List entries in macOS TCC database (requires full-disk access and Big Sur only atm).
 mv | `mv src_file_or_dir dst_file_or_dir` | Move file or folder to destination.
@@ -47,6 +48,7 @@ screenshot | `screenshot` | Take a screenshot (uses Objective-C API, macOS only,
 shell | `shell [command]` | Run a shell command which will spawn using subprocess.Popen(). Note that this will wait for command to complete so be careful not to block your agent.
 shinject | `shinject` | Inject shellcode into target PID using CreateRemoteThread (Windows only - adapted from [here](https://gist.github.com/RobinDavid/9214020)).
 sleep | `sleep [seconds] [jitter percentage]` | Set the callback interval of the agent in seconds.
+unload | `unload command` | Unload an existing capability from an agent.
 upload | `upload` | Upload a file to a remote path on the machine.
 
 ## Python Versions
