@@ -32,8 +32,7 @@
                         file["size"] = file_details.st_size
                     except OSError as e:
                         pass
-                    files.append(file)
-        
+                    files.append(file)  
         file_browser["files"] = files
         task = [task for task in self.taskings if task["task_id"] == task_id]
         task[0]["file_browser"] = file_browser
