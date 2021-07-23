@@ -41,6 +41,7 @@ jobkill | `jobkill [task id]` | Send stop signal to long running task.
 jobs | `jobs` | List long-running tasks, such as downloads.
 load | `load command` | Load a new capability into an agent.
 ls | `ls [. path]` | List files and folders in `[path]` or use `.` for current working directory.
+list_apps | `list_apps` | List macOS applications (Python 2.7 only, macOS only).
 list_tcc | `list_tcc [path]` | List entries in macOS TCC database (requires full-disk access and Big Sur only atm).
 mv | `mv src_file_or_dir dst_file_or_dir` | Move file or folder to destination.
 rm | `rm file_or_dir` | Delete file or folder.
