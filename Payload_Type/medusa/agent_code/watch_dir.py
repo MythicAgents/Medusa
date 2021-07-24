@@ -57,6 +57,7 @@
         if not os.path.isdir(file_path):
             return "[!] Path must be a valid directory"
         else:
+            self.sendTaskOutputUpdate(task_id, "[*] Starting directory watch for {}".format(path))
             #populate known files first
             diffFolder(file_path, False) 
             while(True):
