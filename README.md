@@ -26,11 +26,12 @@ Once installed, restart Mythic to build a new agent.
 
 The base agent and included commands all use built-in Python libraries, so do not need additional packages to function. Agents will run the commands in threads, so long-running uploads or downloads won't block the main agent.
 
+### General Commands
+
 Command | Syntax | Description
 ------- | ------ | -----------
 cat | `cat path/to/file` | Read and output file content.
 cd | `cd [.. dir]` | Change working directory (`..` to go up one directory).
-clipboard | `clipboard` | Output contents of clipboard (uses Objective-C API, as outlined by Cedric Owens [here](https://github.com/cedowens/MacC2/blob/main/client.py#L90). macOS only, Python 2.7 only).
 cp | `cp src_file_or_dir dst_file_or_dir` | Copy file or folder to destination.
 cwd | `cwd` | Print working directory.
 download | `download [path]` | Download a file from the target system.
@@ -41,16 +42,31 @@ jobkill | `jobkill [task id]` | Send stop signal to long running task.
 jobs | `jobs` | List long-running tasks, such as downloads.
 load | `load command` | Load a new capability into an agent.
 ls | `ls [. path]` | List files and folders in `[path]` or use `.` for current working directory.
-list_apps | `list_apps` | List macOS applications (Python 2.7 only, macOS only).
-list_tcc | `list_tcc [path]` | List entries in macOS TCC database (requires full-disk access and Big Sur only atm).
 mv | `mv src_file_or_dir dst_file_or_dir` | Move file or folder to destination.
 rm | `rm file_or_dir` | Delete file or folder.
-screenshot | `screenshot` | Take a screenshot (uses Objective-C API, macOS only, Python 2.7 only).
 shell | `shell [command]` | Run a shell command which will spawn using subprocess.Popen(). Note that this will wait for command to complete so be careful not to block your agent.
 shinject | `shinject` | Inject shellcode into target PID using CreateRemoteThread (Windows only - adapted from [here](https://gist.github.com/RobinDavid/9214020)).
 sleep | `sleep [seconds] [jitter percentage]` | Set the callback interval of the agent in seconds.
 unload | `unload command` | Unload an existing capability from an agent.
 upload | `upload` | Upload a file to a remote path on the machine.
+watch_dir | `watch_dir path seconds` | Watch for changes in target directory, polling for changes at a specified rate.
+
+
+### macOS Commands 
+
+Command | Syntax | Description
+------- | ------ | -----------
+clipboard | `clipboard` | Output contents of clipboard (uses Objective-C API, as outlined by Cedric Owens [here](https://github.com/cedowens/MacC2/blob/main/client.py#L90). macOS only, Python 2.7 only).
+list_apps | `list_apps` | List macOS applications (Python 2.7 only, macOS only).
+list_tcc | `list_tcc [path]` | List entries in macOS TCC database (requires full-disk access and Big Sur only atm).
+screenshot | `screenshot` | Take a screenshot (uses Objective-C API, macOS only, Python 2.7 only).
+
+### Windows Commands
+
+Command | Syntax | Description
+------- | ------ | -----------
+shinject | `shinject` | Inject shellcode into target PID using CreateRemoteThread (Windows only - adapted from [here](https://gist.github.com/RobinDavid/9214020)).
+
 
 ## Python Versions
 
