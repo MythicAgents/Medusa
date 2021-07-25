@@ -16,6 +16,8 @@ From the Mythic install root, run the command:
 Once installed, restart Mythic to build a new agent.
 
 ## Notable Features
+- Dynamic loading/unloading of agent functions to limit exposure of agent capabilities on-disk.
+- Simple job management with `jobs` and `jobkill` functions.
 - File browser compatibility with upload/download
 - Windows injection example using CreateRemoteThread
 - maOS clipboard reader, screenshot grabber and TCC database parsing examples
@@ -86,15 +88,20 @@ if [task for task in self.taskings if task["task_id"] == task_id][0]["stopped"]:
   # Some job-specific tidy up
   return "Job stopped."
 ```
-This handler can be seen implemented within the download, upload and screenshot commands.
+This handler can be seen implemented within the `download`, `upload`, `watch_dir` and `screenshot` commands.
 
-Additionally, if the long-running job is expected to provide continuous output, the `sendTaskOutputUpdate` function can be used to update Mythic prior to the task completion.
+Additionally, if the long-running job is expected to provide continuous output, the `sendTaskOutputUpdate` function - included in the base agent, can be used to update Mythic prior to the task completion. A dummy function that provides continuous output and can be `jobkill`'d can be seen below.
 
 ```
-def sendTaskOutputUpdate(self, task_id, output):
-  responses = [{ "task_id": task_id, "user_output": output, "completed": False }]
-  message = { "action": "post_response", "responses": responses }
-  response_data = self.postMessageAndRetrieveResponse(message)
+def dummyFunction(self, task_id):
+  while(True):
+      # Check if we've got a stop signal.
+      if [task for task in self.taskings if task["task_id"] == task_id][0]["stopped"]: return "Job stopped."
+      
+      # Send output back to Mythic
+      self.sendTaskOutputUpdate(self, task_id, "We're still running")
+
+      time.sleep(10)
 ```
 
 ## Supported C2 Profiles
