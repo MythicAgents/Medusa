@@ -90,7 +90,7 @@ if [task for task in self.taskings if task["task_id"] == task_id][0]["stopped"]:
 ```
 This handler can be seen implemented within the `download`, `upload`, `watch_dir` and `screenshot` commands.
 
-Additionally, if the long-running job is expected to provide continuous output, the `sendTaskOutputUpdate` function - included in the base agent, can be used to update Mythic prior to the task completion. A dummy function that provides continuous output and can be `jobkill`'d can be seen below.
+Additionally, if the long-running job is expected to provide continuous output, the `sendTaskOutputUpdate` function - included in the base agent - can be used to update Mythic prior to the task completion. A dummy function that provides continuous output and can be `jobkill`'d can be seen below.
 
 ```
 def dummyFunction(self, task_id):
