@@ -92,7 +92,7 @@ class Medusa(PayloadType):
 
             if self.get_parameter("output") == "base64":
                     resp.payload = base64.b64encode(base_code.encode())
-                    resp.build_message("Successfully Built")
+                    resp.build_message = "Successfully Built"
             else:
                 resp.payload = base_code.encode()
                 resp.build_message = "Successfully built!"
