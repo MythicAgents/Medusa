@@ -68,6 +68,7 @@ screenshot | `screenshot` | Take a screenshot (uses Objective-C API, macOS only,
 Command | Syntax | Description
 ------- | ------ | -----------
 shinject | `shinject` | Inject shellcode into target PID using CreateRemoteThread (Windows only - adapted from [here](https://gist.github.com/RobinDavid/9214020)).
+load_dll | `load_dll dll_path dll_export` | Load an on-disk DLL and execute an exported function (NOTE: This DLL must return an int value on completion, an msfvenom-created DLL, for example, will kill your agent upon completion).
 
 
 ## Python Versions
