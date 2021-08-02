@@ -19,7 +19,7 @@ Once installed, restart Mythic to build a new agent.
 - Dynamic loading/unloading of agent functions to limit exposure of agent capabilities on-disk.
 - Simple job management with `jobs` and `jobkill` functions.
 - File browser compatibility with upload/download
-- Windows injection example using CreateRemoteThread
+- Cross-platform SOCKS5 proxy
 - maOS clipboard reader, screenshot grabber and TCC database parsing examples
 - Eval() of dynamic Python code
 - Basic Authentication Proxy compatibility
@@ -47,6 +47,7 @@ ls | `ls [. path]` | List files and folders in `[path]` or use `.` for current w
 mv | `mv src_file_or_dir dst_file_or_dir` | Move file or folder to destination.
 rm | `rm file_or_dir` | Delete file or folder.
 shell | `shell [command]` | Run a shell command which will spawn using subprocess.Popen(). Note that this will wait for command to complete so be careful not to block your agent.
+socks | `socks start/stop [port]` | Start/stop SOCKS5 proxy through Medusa agent. 
 shinject | `shinject` | Inject shellcode into target PID using CreateRemoteThread (Windows only - adapted from [here](https://gist.github.com/RobinDavid/9214020)).
 sleep | `sleep [seconds] [jitter percentage]` | Set the callback interval of the agent in seconds.
 unload | `unload command` | Unload an existing capability from an agent.

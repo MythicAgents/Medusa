@@ -33,6 +33,12 @@ class Medusa(PayloadType):
             description="Choose Python version",
             choices=["Python 3.8", "Python 2.7"],
         ),
+        "use_non_default_cryptography_lib": BuildParameter(
+            name="use_non_default_cryptography_lib",
+            parameter_type=BuildParameterType.ChooseOne,
+            description="Use 'cryptography' library",
+            choices=["No", "Yes"],
+        ),
         "obfuscate_script": BuildParameter(
             name="obfuscate_script",
             parameter_type=BuildParameterType.ChooseOne,
@@ -48,16 +54,16 @@ class Medusa(PayloadType):
         BrowserScript(script_name="file_size_to_human_readable_string", author="@djhohnstein")
     ]
 
-    def getPythonVersionFile(self, file):
+    def getPythonVersionFile(self, directory, file):
         pyv = self.get_parameter("python_version")
         filename = ""
-        if os.path.exists(os.path.join(self.agent_code_path, "{}.py".format(file))):
+        if os.path.exists(os.path.join(directory, "{}.py".format(file))):
             #while we've specified a python version, this function is agnostic so just return the .py
-            filename = os.path.join(self.agent_code_path, "{}.py".format(file))
+            filename = os.path.join(directory, "{}.py".format(file))
         elif pyv == "Python 2.7":
-            filename = os.path.join(self.agent_code_path, "{}.py2".format(file))
+            filename = os.path.join(directory, "{}.py2".format(file))
         elif pyv == "Python 3.8":
-            filename = os.path.join(self.agent_code_path, "{}.py3".format(file))
+            filename = os.path.join(directory, "{}.py3".format(file))
             
         if not os.path.exists(filename) or not filename:
             return ""
@@ -72,7 +78,7 @@ class Medusa(PayloadType):
         try:
             command_code = ""
             for cmd in self.commands.get_commands():
-                command_path = self.getPythonVersionFile(cmd)
+                command_path = self.getPythonVersionFile(self.agent_code_path, cmd)
                 if not command_path:
                     build_msg += "{} command not available for {}.\n".format(cmd, self.get_parameter("python_version"))
                 else:
@@ -80,8 +86,15 @@ class Medusa(PayloadType):
                         open(command_path, "r").read() + "\n"
                     )
             base_code = open(
-                os.path.join(self.agent_code_path, self.getPythonVersionFile("base_agent")), "r"
+                self.getPythonVersionFile(os.path.join(self.agent_code_path, "base_agent"), "base_agent"), "r"
             ).read()
+
+            if self.get_parameter("use_non_default_cryptography_lib") == "Yes":
+                crypto_code = open(self.getPythonVersionFile(os.path.join(self.agent_code_path, "base_agent"), "crypto_lib"), "r").read()
+            else:
+                crypto_code = open(self.getPythonVersionFile(os.path.join(self.agent_code_path, "base_agent"), "manual_crypto"), "r").read()
+
+            base_code = base_code.replace("CRYPTO_HERE", crypto_code)
             base_code = base_code.replace("UUID_HERE", self.uuid)
             base_code = base_code.replace("#COMMANDS_HERE", command_code)
             for c2 in self.c2info:
