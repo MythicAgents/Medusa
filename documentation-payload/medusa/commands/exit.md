@@ -14,8 +14,6 @@ This exits the current Medusa agent.
 - Version: 1  
 - Author: @ajpc500  
 
-### Arguments
-
 ## Usage
 
 ```

@@ -14,8 +14,6 @@ Prints the environment variables for the current process
 - Version: 1  
 - Author: @ajpc500
 
-### Arguments
-
 ## Usage
 
 ```

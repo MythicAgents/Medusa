@@ -14,8 +14,6 @@ Use the built-in CGDisplay API calls to capture the display and send it back ove
 - Version: 1  
 - Author: @ajpc500
 
-### Arguments
-
 ## Usage
 
 ```

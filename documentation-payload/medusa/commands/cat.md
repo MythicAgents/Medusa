@@ -16,6 +16,12 @@ Outputs the string content of a given file. No need for quotes and relative path
 
 ### Arguments
 
+#### path_to_read
+
+- Description: path to file we're going to read from
+- Required Value: True  
+- Default Value: None  
+
 ## Usage
 
 ```

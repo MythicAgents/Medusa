@@ -36,7 +36,7 @@ class Medusa(PayloadType):
         "use_non_default_cryptography_lib": BuildParameter(
             name="use_non_default_cryptography_lib",
             parameter_type=BuildParameterType.ChooseOne,
-            description="Use 'cryptography' library",
+            description="Use non-default 'cryptography' Python library for comms (if not, manual crypto will be used)",
             choices=["No", "Yes"],
         ),
         "obfuscate_script": BuildParameter(

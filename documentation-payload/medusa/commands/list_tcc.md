@@ -14,8 +14,6 @@ This uses the Python `sqlite` library to query TCC databases and return the cont
 - Version: 1  
 - Author: @ajpc500  
 
-### Arguments
-
 ## Usage
 
 ```

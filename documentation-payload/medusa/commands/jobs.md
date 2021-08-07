@@ -14,8 +14,6 @@ Lists the currently running jobs (aka long-running functions) for our agent.
 - Version: 1  
 - Author: @ajpc500
 
-### Arguments
-
 ## Usage
 
 ```

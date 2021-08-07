@@ -14,8 +14,6 @@ This uses NSApplication.RunningApplications API to get information about running
 - Version: 1  
 - Author: @ajpc500  
 
-### Arguments
-
 ## Usage
 
 ```

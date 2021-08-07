@@ -16,6 +16,12 @@ This loads new functions into memory via the C2 channel
 
 ### Arguments
 
+#### cmd_to_load
+
+- Description: name of existing Medusa command to load (e.g. shell)
+- Required Value: True  
+- Default Value: None  
+
 ## Usage
 
 ```

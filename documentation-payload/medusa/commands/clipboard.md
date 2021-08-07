@@ -12,10 +12,10 @@ Get all the types of contents on the clipboard, return specific types, or set th
 {{% notice warning %}}
  Root does _*NOT*_ have a clipboard
 {{% /notice %}}
-
+ 
 - Needs Admin: False  
-- Version: 1  
-- Author: @its_a_feature_  
+- Version: 1
+- Author: @ajpc500
 
 ### Reading Clipboard
 
