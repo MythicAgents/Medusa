@@ -44,6 +44,12 @@ class Medusa(PayloadType):
             parameter_type=BuildParameterType.ChooseOne,
             description="XOR and Base64-encode agent code",
             choices=["Yes", "No"],
+        ),
+        "https_check": BuildParameter(
+            name="https_check",
+            parameter_type=BuildParameterType.ChooseOne,
+            description="Verify HTTPS certificate (if HTTP, leave yes)",
+            choices=["Yes", "No"],
         )
     }
     c2_profiles = ["http"]
@@ -105,7 +111,10 @@ class Medusa(PayloadType):
                             json.dumps(val).replace("false", "False").replace("true","True").replace("null","None"))
                     else:
                         base_code = base_code.replace(key, val)
-            
+
+            if self.get_parameter("https_check") == "No":
+                base_code = base_code.replace("urlopen(req)", "urlopen(req, context=gcontext)")
+                
             if build_msg != "":
                 resp.build_stderr = build_msg
                 resp.set_status(BuildStatus.Error)

