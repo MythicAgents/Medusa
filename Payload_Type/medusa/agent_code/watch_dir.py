@@ -34,12 +34,11 @@
                             if print_out: self.sendTaskOutputUpdate(task_id, "[*] Moved File: {}->{} - {} bytes ({})".format(orig_file, full_file_path, file_size, hash))
                             known_files.pop(orig_file)
                     known_files[full_file_path] = hash
-
-            for file in known_files.keys():
+            for file in list(known_files):
                 if not os.path.isdir(os.path.dirname(file)):
-                    for del_file in [f for f in known_files.keys() if f.startswith(os.path.dirname(file))]:
+                    for del_file in [f for f in list(known_files) if f.startswith(os.path.dirname(file))]:
                         obj_type = "Directory" if not known_files[del_file] else "File"
-                        if file in known_files.keys():
+                        if file in list(known_files):
                             if print_out: self.sendTaskOutputUpdate(task_id, "[*] {} deleted: {} {}".format(obj_type, \
                                 del_file, "({})".format(known_files[del_file]) if known_files[del_file] else ""))
                             known_files.pop(file)
@@ -58,7 +57,6 @@
             return "[!] Path must be a valid directory"
         else:
             self.sendTaskOutputUpdate(task_id, "[*] Starting directory watch for {}".format(path))
-            #populate known files first
             diffFolder(file_path, False) 
             while(True):
                 if [task for task in self.taskings if task["task_id"] == task_id][0]["stopped"]: return "Job stopped."
