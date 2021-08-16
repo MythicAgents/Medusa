@@ -6,7 +6,7 @@
         target_is_file = os.path.isfile(file_path)
         target_name = os.path.basename(file_path.rstrip(os.sep))
         file_browser = {
-            "host": self.getHostname(),
+            "host": socket.gethostname(),
             "is_file": target_is_file,
             "permissions": {"octal": oct(file_details.st_mode)[-3:]},
             "name": target_name if target_name != "." \

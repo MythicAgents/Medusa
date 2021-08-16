@@ -36,7 +36,7 @@ class WatchDirArguments(TaskArguments):
 class WatchDirCommand(CommandBase):
     cmd = "watch_dir"
     needs_admin = False
-    help_cmd = "lwatch_dir [/path/to/file]"
+    help_cmd = "watch_dir [/path/to/file]"
     description = "Poll a directory for changes"
     version = 1
     author = "@ajpc500"

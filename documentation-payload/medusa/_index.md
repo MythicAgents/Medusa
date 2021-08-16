@@ -54,6 +54,9 @@ Medusa agents can be built using either a manual crypto implementation or using 
 
 Finally, the plaintext Medusa script can be encrypted via XOR with a randomly-generated key, before being Base64 encoded. This blob is then wrapped with an unpacker and put in a `exec()` function to ultimately run the Medusa agent. This is designed to make the agent less signaturable when on-disk. See the OPSEC section for more details.
 
+#### Verify HTTPS Certificate
+
+By default, the web request libraries used in Medusa will fail when handling a self-signed certificate for HTTPS. This function introduces code to skip cert verification, so C2 can be established.
 
 
 ### Important Notes

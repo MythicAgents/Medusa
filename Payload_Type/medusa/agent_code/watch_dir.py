@@ -55,6 +55,8 @@
 
         if not os.path.isdir(file_path):
             return "[!] Path must be a valid directory"
+        elif not os.access(file_path, os.R_OK):
+            return "[!] Path not accessible"
         else:
             self.sendTaskOutputUpdate(task_id, "[*] Starting directory watch for {}".format(path))
             diffFolder(file_path, False) 

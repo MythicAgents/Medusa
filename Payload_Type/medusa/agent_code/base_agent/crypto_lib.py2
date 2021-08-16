@@ -37,10 +37,10 @@ class medusa:
                 backend = default_backend()
 
                 key = base64.b64decode(self.agent_config["enc_key"]["dec_key"])
-                uuid = data[:36] # uuid prefix
-                iv = data[36:52] # trim uuid
-                ct = data[52:-32] # ciphertext been uuid+iv and hmac
-                received_hmac = data[-32:] #hmac
+                uuid = data[:36]
+                iv = data[36:52]
+                ct = data[52:-32]
+                received_hmac = data[-32:]
 
                 h = hmac.HMAC(key, hashes.SHA256(), backend)
                 h.update(iv + ct)
