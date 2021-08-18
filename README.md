@@ -43,6 +43,7 @@ eval_code | `eval_code [commands]` | Execute python code and return output.
 jobkill | `jobkill [task id]` | Send stop signal to long running task.
 jobs | `jobs` | List long-running tasks, such as downloads.
 load | `load command` | Load a new capability into an agent.
+load_script | `load_script` | Load and execute a Python script through the agent.
 ls | `ls [. path]` | List files and folders in `[path]` or use `.` for current working directory.
 mv | `mv src_file_or_dir dst_file_or_dir` | Move file or folder to destination.
 rm | `rm file_or_dir` | Delete file or folder.
