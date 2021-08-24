@@ -11,16 +11,16 @@ To install Medusa, you'll need Mythic installed on a remote computer. You can fi
 
 From the Mythic install root, run the command:
 
-`./mythic-cli payload install github https://github.com/MythicAgents/Medusa.git`
+`./mythic-cli install github https://github.com/MythicAgents/Medusa.git`
 
 Once installed, restart Mythic to build a new agent.
 
 ## Notable Features
 - Dynamic loading/unloading of agent functions to limit exposure of agent capabilities on-disk.
-- Simple job management with `jobs` and `jobkill` functions.
-- File browser compatibility with upload/download
+- Loading of Python modules in-memory for use in custom scripts.
 - Cross-platform SOCKS5 proxy
 - maOS clipboard reader, screenshot grabber and TCC database parsing examples
+- File browser compatibility with upload/download
 - Eval() of dynamic Python code
 - Basic Authentication Proxy compatibility
 
@@ -42,7 +42,9 @@ env | `env` | Print environment variables.
 eval_code | `eval_code [commands]` | Execute python code and return output.
 jobkill | `jobkill [task id]` | Send stop signal to long running task.
 jobs | `jobs` | List long-running tasks, such as downloads.
+list_modules | `list_modules [module_name]` | Lists in-memory modules or the full file listing for a specific module.
 load | `load command` | Load a new capability into an agent.
+load_module | `load_module` | Load a zipped Python module into memory.
 load_script | `load_script` | Load and execute a Python script through the agent.
 ls | `ls [. path]` | List files and folders in `[path]` or use `.` for current working directory.
 mv | `mv src_file_or_dir dst_file_or_dir` | Move file or folder to destination.
@@ -52,6 +54,7 @@ socks | `socks start/stop [port]` | Start/stop SOCKS5 proxy through Medusa agent
 shinject | `shinject` | Inject shellcode into target PID using CreateRemoteThread (Windows only - adapted from [here](https://gist.github.com/RobinDavid/9214020)).
 sleep | `sleep [seconds] [jitter percentage]` | Set the callback interval of the agent in seconds.
 unload | `unload command` | Unload an existing capability from an agent.
+unload_module | `unload_module module_name` | Unload a Python module previously loaded into memory.
 upload | `upload` | Upload a file to a remote path on the machine.
 watch_dir | `watch_dir path seconds` | Watch for changes in target directory, polling for changes at a specified rate.
 
