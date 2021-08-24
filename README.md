@@ -44,7 +44,7 @@ jobkill | `jobkill [task id]` | Send stop signal to long running task.
 jobs | `jobs` | List long-running tasks, such as downloads.
 list_modules | `list_modules [module_name]` | Lists in-memory modules or the full file listing for a specific module.
 load | `load command` | Load a new capability into an agent.
-load_module | `load_module` | Load a zipped Python module into memory.
+load_module | `load_module` | Load a zipped Python module into memory (adapted from [here](https://github.com/sulinx/remote_importer) and [here](https://github.com/EmpireProject/EmPyre/blob/master/data/agent/agent.py#L464)).
 load_script | `load_script` | Load and execute a Python script through the agent.
 ls | `ls [. path]` | List files and folders in `[path]` or use `.` for current working directory.
 mv | `mv src_file_or_dir dst_file_or_dir` | Move file or folder to destination.
@@ -122,5 +122,6 @@ The HTTP profile calls back to the Mythic server over the basic, non-dynamic pro
 
 - Browser scripts and agent code adapted from [@its_a_feature_](https://twitter.com/its_a_feature_) and [@djhohnstein](https://twitter.com/djhohnstein).
 - [MacC2](https://github.com/cedowens/MacC2/) and [this](https://medium.com/red-teaming-with-a-blue-team-mentality/making-objective-c-calls-from-python-standard-libraries-550ed3a30a30) blog post from Cedric Owens
+- [EmPyre](https://github.com/EmpireProject/EmPyre/) and [this](https://www.xorrior.com/In-Memory-Python-Imports/) blog post from Chris Ross.
 - The crypto wizardry found [here](https://github.com/boppreh/aes).
 - Agent icon from [flaticon.com](https://www.flaticon.com)
