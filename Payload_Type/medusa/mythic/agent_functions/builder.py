@@ -114,8 +114,11 @@ class Medusa(PayloadType):
 
             if self.get_parameter("https_check") == "No":
                 base_code = base_code.replace("urlopen(req)", "urlopen(req, context=gcontext)")
-                base_code = base_code.replace("#CERTSKIP", \
-                    "gcontext = ssl.SSLContext(ssl.PROTOCOL_TLS)\n        gcontext.verify_mode = ssl.CERT_NONE")
+                base_code = base_code.replace("#CERTSKIP", 
+                """
+        gcontext = ssl.create_default_context()
+        gcontext.check_hostname = False
+        gcontext.verify_mode = ssl.CERT_NONE\n""")
             else:
                 base_code = base_code.replace("#CERTSKIP", "")
 
