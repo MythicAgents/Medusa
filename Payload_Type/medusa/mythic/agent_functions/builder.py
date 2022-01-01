@@ -20,38 +20,38 @@ class Medusa(PayloadType):
     mythic_encrypts = True
     note = "This payload uses Python to create a simple agent"
     supports_dynamic_loading = True
-    build_parameters = {
-        "output": BuildParameter(
+    build_parameters = [
+        BuildParameter(
             name="output",
             parameter_type=BuildParameterType.ChooseOne,
             description="Choose output format",
             choices=["py", "base64"],
         ),
-        "python_version": BuildParameter(
+        BuildParameter(
             name="python_version",
             parameter_type=BuildParameterType.ChooseOne,
             description="Choose Python version",
             choices=["Python 3.8", "Python 2.7"],
         ),
-        "use_non_default_cryptography_lib": BuildParameter(
+        BuildParameter(
             name="use_non_default_cryptography_lib",
             parameter_type=BuildParameterType.ChooseOne,
             description="Use non-default 'cryptography' Python library for comms (if not, manual crypto will be used)",
             choices=["No", "Yes"],
         ),
-        "obfuscate_script": BuildParameter(
+        BuildParameter(
             name="obfuscate_script",
             parameter_type=BuildParameterType.ChooseOne,
             description="XOR and Base64-encode agent code",
             choices=["Yes", "No"],
         ),
-        "https_check": BuildParameter(
+        BuildParameter(
             name="https_check",
             parameter_type=BuildParameterType.ChooseOne,
             description="Verify HTTPS certificate (if HTTP, leave yes)",
             choices=["Yes", "No"],
         )
-    }
+    ]
     c2_profiles = ["http"]
     translation_container = None
     support_browser_scripts = [

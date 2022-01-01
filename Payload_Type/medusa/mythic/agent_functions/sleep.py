@@ -7,26 +7,31 @@ def positiveTime(val):
         raise ValueError("Value must be positive")
 
 class SleepArguments(TaskArguments):
-    def __init__(self, command_line):
-        super().__init__(command_line)
-        self.args = {
-            "jitter": CommandParameter(
+    def __init__(self, command_line, **kwargs):
+        super().__init__(command_line, **kwargs)
+        self.args = [
+            CommandParameter(
                 name="jitter",
                 type=ParameterType.Number,
                 validation_func=positiveTime,
-                required=False,
+                default_value=-1,
+                parameter_group_info=[ParameterGroupInfo(
+                    required=False,
+                    ui_position=2
+                )],
                 description="Percentage of C2's interval to use as jitter",
-                ui_position=2
             ),
-            "seconds": CommandParameter(
+            CommandParameter(
                 name="seconds",
                 type=ParameterType.Number,
-                required=False,
+                parameter_group_info=[ParameterGroupInfo(
+                    required=False,
+                    ui_position=1
+                )],
                 validation_func=positiveTime,
                 description="Number of seconds between checkins",
-                ui_position=1
             ),
-        }
+        ]
 
     async def parse_arguments(self):
         if self.command_line[0] != "{":
@@ -58,7 +63,7 @@ class SleepCommand(CommandBase):
 
     async def create_tasking(self, task: MythicTask) -> MythicTask:
         task.display_params = str(task.args.get_arg("seconds")) + "s"
-        if task.args.get_arg("jitter") is not None:
+        if task.args.get_arg("jitter") is not -1:
             task.display_params += " with " + str(task.args.get_arg("jitter")) + "% jitter"
         return task
 

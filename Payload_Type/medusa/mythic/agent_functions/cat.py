@@ -5,15 +5,15 @@ import sys
 
 
 class CatArguments(TaskArguments):
-    def __init__(self, command_line):
-        super().__init__(command_line)
-        self.args = {
-            "path": CommandParameter(
+    def __init__(self, command_line, **kwargs):
+        super().__init__(command_line, **kwargs)
+        self.args = [
+            CommandParameter(
                 name="path",
                 type=ParameterType.String,
                 description="Read and output the content of a file",
             )
-        }
+        ]
 
     async def parse_arguments(self):
         if len(self.command_line) > 0:

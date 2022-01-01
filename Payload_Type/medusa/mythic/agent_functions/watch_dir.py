@@ -4,23 +4,27 @@ import json
 
 
 class WatchDirArguments(TaskArguments):
-    def __init__(self, command_line):
-        super().__init__(command_line)
-        self.args = {
-            "path": CommandParameter(
+    def __init__(self, command_line, **kwargs):
+        super().__init__(command_line, **kwargs)
+        self.args = [
+            CommandParameter(
                 name="path",
                 type=ParameterType.String,
-                required=False,
+                parameter_group_info=[ParameterGroupInfo(
+                    required=False
+                )],
                 description="Path of folder on the current system to watch",
             ),
-            "seconds": CommandParameter(
+            CommandParameter(
                 name="seconds",
                 type=ParameterType.Number,
-                required=False,
+                parameter_group_info=[ParameterGroupInfo(
+                    required=False
+                )],
                 default_value=60, 
                 description="Seconds to wait between polling directory for changes",
             )
-        }
+        ]
 
     async def parse_arguments(self):
         if self.command_line[0] != "{":

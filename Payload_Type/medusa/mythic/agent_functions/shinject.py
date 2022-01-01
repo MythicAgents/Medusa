@@ -5,18 +5,20 @@ import sys
 import base64
 
 class ShinjectArguments(TaskArguments):
-    def __init__(self, command_line):
-        super().__init__(command_line)
-        self.args = {
-            "shellcode": CommandParameter(
-                name="shellcode", type=ParameterType.File, description="Shellcode to inject"
+    def __init__(self, command_line, **kwargs):
+        super().__init__(command_line, **kwargs)
+        self.args = [
+            CommandParameter(
+                name="shellcode", 
+                type=ParameterType.File, 
+                description="Shellcode to inject"
             ),
-            "pid": CommandParameter(
+            CommandParameter(
                 name="pid",
                 type=ParameterType.Number,
                 description="ID of process to inject into",
             ),
-        }
+        ]
 
     async def parse_arguments(self):
         if len(self.command_line) > 0:

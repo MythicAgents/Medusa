@@ -3,16 +3,16 @@ from mythic_payloadtype_container.MythicRPC import *
 import json, base64, os
 
 class LoadArguments(TaskArguments):
-    def __init__(self, command_line):
-        super().__init__(command_line)
-        self.args = {
-            "command": CommandParameter(
+    def __init__(self, command_line, **kwargs):
+        super().__init__(command_line, **kwargs)
+        self.args = [
+            CommandParameter(
                 name="command", 
                 type=ParameterType.ChooseOne, 
                 default_value=[], 
                 dynamic_query_function=self.get_commands
             )
-        }
+        ]
 
     async def get_commands(self, callback: dict) -> [str]:
         resp = await MythicRPC().execute("get_callback_commands", callback_id=callback["id"])

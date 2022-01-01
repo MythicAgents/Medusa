@@ -5,17 +5,19 @@ import sys
 
 
 class ListTccArguments(TaskArguments):
-    def __init__(self, command_line):
-        super().__init__(command_line)
-        self.args = {
-            "db": CommandParameter(
+    def __init__(self, command_line, **kwargs):
+        super().__init__(command_line, **kwargs)
+        self.args = [
+            CommandParameter(
                 name="db",
                 type=ParameterType.String,
-                required=False,
+                parameter_group_info=[ParameterGroupInfo(
+                    required=False
+                )],
                 default_value="/Library/Application Support/com.apple.TCC/TCC.db",
                 description="Path to TCC database",
             )
-        }
+        ]
 
     async def parse_arguments(self):
         if len(self.command_line) > 0:

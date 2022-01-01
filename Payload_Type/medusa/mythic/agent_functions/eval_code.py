@@ -5,15 +5,15 @@ import sys
 
 
 class EvalArguments(TaskArguments):
-    def __init__(self, command_line):
-        super().__init__(command_line)
-        self.args = {
-            "command": CommandParameter(
+    def __init__(self, command_line, **kwargs):
+        super().__init__(command_line, **kwargs)
+        self.args = [
+            CommandParameter(
                 name="command",
                 type=ParameterType.String,
                 description="Command to evaluate in Python interpreter",
             )
-        }
+        ]
 
     async def parse_arguments(self):
         if len(self.command_line) > 0:

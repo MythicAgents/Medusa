@@ -6,12 +6,27 @@ class SocksArguments(TaskArguments):
 
     valid_actions = ["start", "stop"]
 
-    def __init__(self, command_line):
-        super().__init__(command_line)
-        self.args = {
-            "action": CommandParameter(name="action", choices=["start","stop"], required=True, type=ParameterType.ChooseOne, description="Start or stop the socks server."),
-            "port": CommandParameter(name="port", required=False, type=ParameterType.Number, description="Port to start the socks server on."),
-        }
+    def __init__(self, command_line, **kwargs):
+        super().__init__(command_line, **kwargs)
+        self.args = [
+            CommandParameter(
+                name="action", 
+                choices=["start","stop"], 
+                parameter_group_info=[ParameterGroupInfo(
+                    required=True
+                )], 
+                type=ParameterType.ChooseOne, 
+                description="Start or stop the socks server."
+            ),
+            CommandParameter(
+                name="port", 
+                parameter_group_info=[ParameterGroupInfo(
+                    required=False
+                )], 
+                type=ParameterType.Number, 
+                description="Port to start the socks server on."
+            ),
+        ]
 
     async def parse_arguments(self):
         if len(self.command_line) == 0:

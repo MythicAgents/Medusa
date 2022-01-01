@@ -5,13 +5,15 @@ import sys
 import base64
 
 class LoadScriptArguments(TaskArguments):
-    def __init__(self, command_line):
-        super().__init__(command_line)
-        self.args = {
-            "file": CommandParameter(
-                name="file", type=ParameterType.File, description="script to load"
+    def __init__(self, command_line, **kwargs):
+        super().__init__(command_line, **kwargs)
+        self.args = [
+            CommandParameter(
+                name="file", 
+                type=ParameterType.File, 
+                description="script to load"
             )
-        }
+        ]
 
     async def parse_arguments(self):
         if len(self.command_line) > 0:

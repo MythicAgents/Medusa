@@ -5,18 +5,18 @@ import sys
 import base64
 
 class LoadModuleArguments(TaskArguments):
-    def __init__(self, command_line):
-        super().__init__(command_line)
-        self.args = {
-            "file": CommandParameter(
+    def __init__(self, command_line, **kwargs):
+        super().__init__(command_line, **kwargs)
+        self.args = [
+            CommandParameter(
                 name="file", type=ParameterType.File, description="Zipped library to upload"
             ),
-            "module_name": CommandParameter(
+            CommandParameter(
                 name="module_name",
                 type=ParameterType.String,
                 description="Name of module to load, e.g. cryptography"
             )
-        }
+        ]
 
     async def parse_arguments(self):
         if len(self.command_line) > 0:
