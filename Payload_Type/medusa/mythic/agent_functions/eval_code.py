@@ -1,5 +1,5 @@
 from mythic_payloadtype_container.MythicCommandBase import *
-import json
+import json, re
 from mythic_payloadtype_container.MythicRPC import *
 import sys
 
@@ -18,6 +18,9 @@ class EvalArguments(TaskArguments):
     async def parse_arguments(self):
         if len(self.command_line) > 0:
             self.add_arg("command", self.command_line)
+        
+    async def parse_dictionary(self, dictionary_arguments):
+        self.load_args_from_dictionary(dictionary_arguments)
 
 
 class EvalCommand(CommandBase):

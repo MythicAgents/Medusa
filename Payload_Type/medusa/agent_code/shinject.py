@@ -6,7 +6,7 @@
         while (chunk_num < total_chunks):
             data = { 
                 "action": "post_response", "responses": [{
-                    "upload": { "chunk_size": 51200, "file_id": shellcode, "chunk_num": chunk_num },
+                    "upload": { "chunk_size": 51200, "file_id": shellcode, "chunk_num": chunk_num+1 },
                     "task_id": task_id
                 }] 
             }

@@ -31,9 +31,13 @@
                     "responses": [
                         {
                             "chunk_num": chunk_num,
-                            "file_id": initial_response["responses"][0]["file_id"],
                             "chunk_data": base64.b64encode(content).decode(),
-                            "task_id": task_id
+                            "task_id": task_id,
+                            "user_output": { 
+                                "agent_file_id": initial_response["responses"][0]["file_id"], 
+                                "filename": file,
+                                "total_chunks": total_chunks
+                            }
                         }
                     ]
                 }
