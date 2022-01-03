@@ -48,6 +48,7 @@ load_module | `load_module` | Load a zipped Python module into memory (adapted f
 load_script | `load_script` | Load and execute a Python script through the agent.
 ls | `ls [. path]` | List files and folders in `[path]` or use `.` for current working directory.
 mv | `mv src_file_or_dir dst_file_or_dir` | Move file or folder to destination.
+pip_freeze | `pip_freeze` | Programmatically list installed packages on system.
 rm | `rm file_or_dir` | Delete file or folder.
 shell | `shell [command]` | Run a shell command which will spawn using subprocess.Popen(). Note that this will wait for command to complete so be careful not to block your agent.
 socks | `socks start/stop [port]` | Start/stop SOCKS5 proxy through Medusa agent. 

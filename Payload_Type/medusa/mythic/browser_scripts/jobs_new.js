@@ -1,40 +1,45 @@
-function(task, response){
-  console.log(response);
-  var rows = [];
-
-  for(var i = 0; i < response.length; i++){
-    try{
-        var data = JSON.parse(response[i].replace((new RegExp("'", 'g')), '"'));
-    }catch(error){
-      var msg = "Unhandled exception in jobs.js for " + task.command + " (ID: " + task.id + "): " + error;
-      console.error(msg);
-        return response[i]['response'];
-    }
-
-    var entries = data['jobs'];
-
-    var row_style = "";
-    var cell_style = {
-      "task id":"max-width:0;",
-      "command":"max-width:0;"
-    };
-    for (var j = 0; j < entries.length; j++)
-    {
-      var copy_taskid_icon = '<i class="fas fa fa-clipboard" data-toggle="tooltip" title="Copy task id to clipboard" additional-info=' + btoa(entries[j][1]) + ' style="cursor: pointer;" onclick=support_scripts[\"medusa_copy_additional_info_to_clipboard\"](this)></i>';   
-      
-      rows.push({
-        "": copy_taskid_icon,
-        "task id":entries[j][1],
-        "command":entries[j][0],
-        "row-style": row_style,
-        "cell-style": cell_style
-      });
-    }
-    var output = support_scripts['medusa_create_table']([
-      {"name":"", "size":"1em"},
-      {"name":"task id", "size":"15em"},
-      {"name":"command", "size":"6em"}
-    ], rows);
-    return output;
-}
+function(task, responses){
+  if(task.status.includes("error")){
+      const combined = responses.reduce( (prev, cur) => {
+          return prev + cur;
+      }, "");
+      return {'plaintext': combined};
+  }else if(task.completed){
+      if(responses.length > 0){
+          try{
+                  let data = JSON.parse(responses[0].replace((new RegExp("'", 'g')), '"'));
+                  let entries = data["jobs"];
+                  let output_table = [];
+                  for(let i = 0; i < entries.length; i++){
+                      output_table.push({
+                          "command":{"plaintext": entries[i][0]},
+                          "task_id": {"plaintext": entries[i][1]},
+                          "rowStyle": {"backgroundColor": "mediumpurple"}
+                      })
+                  }
+                  return {
+                      "table": [
+                          {
+                              "headers": [
+                                  {"plaintext": "command", "type": "string", "width": 9},
+                                  {"plaintext": "task_id", "type": "string"},
+                              ],
+                              "rows": output_table,
+                              "title": "Running Jobs"
+                          }
+                      ]
+                  }
+          }catch(error){
+                  console.log(error);
+                  const combined = responses.reduce( (prev, cur) => {
+                      return prev + cur;
+                  }, "");
+                  return {'plaintext': combined};
+          }
+      }else{
+          return {"plaintext": "No output from command"};
+      }
+  }else{
+      return {"plaintext": "No data to display..."};
+  }
 }

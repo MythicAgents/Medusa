@@ -11,7 +11,7 @@ class WatchDirArguments(TaskArguments):
                 name="path",
                 type=ParameterType.String,
                 parameter_group_info=[ParameterGroupInfo(
-                    required=False
+                    required=True
                 )],
                 description="Path of folder on the current system to watch",
             ),
@@ -36,6 +36,10 @@ class WatchDirArguments(TaskArguments):
                 raise Exception("Wrong number of parameters, should be 2")
         else:
             self.load_args_from_json_string(self.command_line)
+
+    async def parse_dictionary(self, dictionary_arguments):
+        self.load_args_from_dictionary(dictionary_arguments)
+
 
 class WatchDirCommand(CommandBase):
     cmd = "watch_dir"
