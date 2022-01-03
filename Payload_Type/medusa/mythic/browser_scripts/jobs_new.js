@@ -13,7 +13,7 @@ function(task, responses){
                   for(let i = 0; i < entries.length; i++){
                       output_table.push({
                           "command":{"plaintext": entries[i][0]},
-                          "task_id": {"plaintext": entries[i][1]},
+                          "task_id": {"plaintext": entries[i][1], "copyIcon": true},
                           "rowStyle": {"backgroundColor": "mediumpurple"}
                       })
                   }

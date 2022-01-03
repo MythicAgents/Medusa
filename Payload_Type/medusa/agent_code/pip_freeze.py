@@ -14,7 +14,12 @@
             return "\n".join(installed_packages_list)
         except:
             out+="[*] pip module not installed.\n"
-        
+
+        try:
+            import pkgutil
+            installed_packages_list = [ a for _, a, _ in pkgutil.iter_modules()]
+            return "\n".join(installed_packages_list)
+        except:
+            out+="[*] pkgutil module not installed.\n"
+
         return out+"[!] No modules available to list installed packages."
-        
- 
