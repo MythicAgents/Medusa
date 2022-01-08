@@ -27,6 +27,9 @@ class ListAppsCommand(CommandBase):
     attackmapping = []
     browser_script = [BrowserScript(script_name="list_apps", author="@ajpc500")]
     attributes = CommandAttributes(
+        filter_by_build_parameter={
+            "python_version": "Python 2.7"
+        },
         supported_python_versions=["Python 2.7"],
         supported_os=[SupportedOS.MacOS],
     )

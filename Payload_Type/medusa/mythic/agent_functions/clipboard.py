@@ -27,6 +27,9 @@ class GetClipboardCommand(CommandBase):
     argument_class = GetClipboardArguments
     attackmapping = [ "T1115" ]
     attributes = CommandAttributes(
+        filter_by_build_parameter={
+            "python_version": "Python 2.7"
+        },
         supported_python_versions=["Python 2.7"],
         supported_os=[SupportedOS.MacOS],
     )

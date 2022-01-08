@@ -37,7 +37,7 @@ class CdCommand(CommandBase):
         supported_python_versions=["Python 2.7", "Python 3.8"],
         supported_os=[SupportedOS.MacOS, SupportedOS.Windows, SupportedOS.Linux ],
     )
-
+    
     async def create_tasking(self, task: MythicTask) -> MythicTask:
         task.display_params = task.args.get_arg("path")
         return task

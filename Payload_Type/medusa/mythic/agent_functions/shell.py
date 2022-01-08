@@ -14,13 +14,12 @@ class ShellArguments(TaskArguments):
         ]
 
     async def parse_arguments(self):
-        if len(self.command_line) > 0:
-            if self.command_line[0] == "{":
-                self.load_args_from_json_string(self.command_line)
-            else:
-                self.add_arg("command", self.command_line)
-        else:
-            raise ValueError("Missing arguments")
+        if len(self.command_line) == 0:
+            raise ValueError("Must supply a command to run")
+        self.add_arg("command", self.command_line)
+
+    async def parse_dictionary(self, dictionary_arguments):
+        self.load_args_from_dictionary(dictionary_arguments)
 
 class ShellCommand(CommandBase):
     cmd = "shell"

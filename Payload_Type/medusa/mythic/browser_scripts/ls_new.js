@@ -1,6 +1,4 @@
 function(task, response){
-  console.log(response);
-  console.log(task);
 
   if(task.status.includes("error")){
     const combined = response.reduce( (prev, cur) => {
@@ -25,7 +23,7 @@ function(task, response){
     var dbExt = [".db", ".sql", ".psql"];
     var keyFiles = [".pem", ".ppk"];
     var scriptFiles = [".config", ".ps1", ".psm1", ".psd1", ".vbs", ".js", ".py", ".pl", ".rb", ".go", ".xml", ".html", ".css", ".sh", ".bash", ".yaml", ".yml"];
-    var uniqueName = task.id + "_additional_permission_info_modal";
+    // var uniqueName = task.id + "_additional_permission_info_modal";
     
     let rows = [];
     let data = "";
@@ -62,7 +60,7 @@ function(task, response){
       var icon = "";
       if (data["files"][i]["is_file"] ===  true) {
         var fileExt = "." + data["files"][i]['name'].split(".").slice(-1)[0].toLowerCase();
-        var icon = 'code/source';
+        
         if (archiveFormats.includes(fileExt)) {
           icon = 'archive/zip';
         } else if (diskImages.includes(fileExt)) {
@@ -81,9 +79,11 @@ function(task, response){
           icon = 'key';
         } else if (scriptFiles.includes(fileExt)) {
           icon = 'code/source';
+        } else {
+          icon = 'code/source';
         }
       } else {
-        icon = 'folder/openFolder';
+        icon = 'closedFolder';
       }
 
       let row = {

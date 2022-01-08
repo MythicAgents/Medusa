@@ -7,16 +7,21 @@ class LoadArguments(TaskArguments):
         super().__init__(command_line, **kwargs)
         self.args = [
             CommandParameter(
-                name="command", 
-                type=ParameterType.ChooseOne, 
-                default_value=[], 
-                dynamic_query_function=self.get_commands
-            )
+                name="command",
+                type=ParameterType.ChooseOne,
+                description="Command to load into the agent",
+                choices_are_all_commands=True,
+                # choice_filter_by_command_attributes={
+                #     "supported_python_versions": [ 
+                #         callback["build_parameters"]["python_version"] 
+                #     ]
+                # }
+            ),
         ]
 
-    async def get_commands(self, callback: dict) -> [str]:
-        resp = await MythicRPC().execute("get_callback_commands", callback_id=callback["id"])
-        return [ cmd["cmd"] for cmd in resp.response if callback["build_parameters"]["python_version"] in cmd["attributes"]["supported_python_versions"]]
+    # async def get_commands(self, callback: dict) -> [str]:
+    #     resp = await MythicRPC().execute("get_callback_commands", callback_id=callback["id"])
+    #     return [ cmd["cmd"] for cmd in resp.response if callback["build_parameters"]["python_version"] in cmd["attributes"]["supported_python_versions"]]
 
     async def parse_arguments(self):
         if self.command_line[0] != "{":
@@ -24,6 +29,8 @@ class LoadArguments(TaskArguments):
         else:
             self.load_args_from_json_string(self.command_line)
 
+    async def parse_dictionary(self, dictionary_arguments):
+        self.load_args_from_dictionary(dictionary_arguments)
 
 class LoadCommand(CommandBase):
     cmd = "load"
