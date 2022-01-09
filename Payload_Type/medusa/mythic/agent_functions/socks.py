@@ -28,6 +28,9 @@ class SocksArguments(TaskArguments):
             ),
         ]
 
+    async def parse_dictionary(self, dictionary_arguments):
+        self.load_args_from_dictionary(dictionary_arguments)
+
     async def parse_arguments(self):
         if len(self.command_line) == 0:
             raise Exception("Must be passed \"start\" or \"stop\" commands on the command line.")
@@ -82,6 +85,7 @@ class SocksCommand(CommandBase):
             task.display_params = "Stopping SOCKS5 proxy"
         if resp.status != MythicStatus.Success:
             task.status = MythicStatus.Error
+            raise Exception(resp.error)
         return task
 
     async def process_response(self, response: AgentResponse):

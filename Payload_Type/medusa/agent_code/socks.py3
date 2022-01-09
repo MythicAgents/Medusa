@@ -1,6 +1,6 @@
     def socks(self, task_id, action, port):
         import socket, select, queue
-        from threading import Thread, activeCount
+        from threading import Thread, active_count
         from struct import pack, unpack
         
         MAX_THREADS = 200
@@ -115,7 +115,7 @@
 
         if action == "start":
             if len(t_socks) > 0: return "[!] SOCKS Proxy already running."
-            self.sendTaskOutputUpdate(task_id, "[*] SOCKS Proxy started.")
+            self.sendTaskOutputUpdate(task_id, "[*] SOCKS Proxy started.\n")
             while True:
                 if [task for task in self.taskings if task["task_id"] == task_id][0]["stopped"]:
                     return "[*] SOCKS Proxy stopped."
@@ -130,7 +130,7 @@
                                 self.socks_open.pop(server_id)
                         else:
                             if not packet_json["exit"]:    
-                                if activeCount() > MAX_THREADS:
+                                if active_count() > MAX_THREADS:
                                     sleep(3)
                                     continue
                                 self.socks_open[server_id] = queue.Queue()
