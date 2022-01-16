@@ -52,7 +52,6 @@ pip_freeze | `pip_freeze` | Programmatically list installed packages on system.
 rm | `rm file_or_dir` | Delete file or folder.
 shell | `shell [command]` | Run a shell command which will spawn using subprocess.Popen(). Note that this will wait for command to complete so be careful not to block your agent.
 socks | `socks start/stop [port]` | Start/stop SOCKS5 proxy through Medusa agent. 
-shinject | `shinject` | Inject shellcode into target PID using CreateRemoteThread (Windows only - adapted from [here](https://gist.github.com/RobinDavid/9214020)).
 sleep | `sleep [seconds] [jitter percentage]` | Set the callback interval of the agent in seconds.
 unload | `unload command` | Unload an existing capability from an agent.
 unload_module | `unload_module module_name` | Unload a Python module previously loaded into memory.

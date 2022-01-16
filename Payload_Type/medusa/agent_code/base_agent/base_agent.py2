@@ -36,7 +36,8 @@ CRYPTO_HERE
 
     def postResponses(self):
         try:
-            responses = socks = []
+            responses = []
+            socks = []
             taskings = self.taskings
             for task in taskings:
                 if task["completed"] == True:
@@ -72,10 +73,12 @@ CRYPTO_HERE
                 task["result"] = output
                 task["completed"] = True
             else:
-                task["error"] = task["completed"] = True
+                task["error"] = True
+                task["completed"] = True
                 task["result"] = "Function unavailable."
         except Exception as error:
-            task["error"] = task["completed"] = True
+            task["error"] = True
+            task["completed"] = True
             task["result"] = error
 
     def processTaskings(self):
