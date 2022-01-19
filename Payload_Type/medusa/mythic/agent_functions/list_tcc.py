@@ -12,7 +12,7 @@ class ListTccArguments(TaskArguments):
                 name="db",
                 type=ParameterType.String,
                 parameter_group_info=[ParameterGroupInfo(
-                    required=False
+                    required=True
                 )],
                 default_value="/Library/Application Support/com.apple.TCC/TCC.db",
                 description="Path to TCC database",
@@ -40,7 +40,10 @@ class ListTccCommand(CommandBase):
     attackmapping = []
     supported_ui_features = []
     argument_class = ListTccArguments
-    browser_script = [BrowserScript(script_name="tcc", author="@ajpc500")]
+    browser_script = [
+        BrowserScript(script_name="tcc", author="@ajpc500"),
+        BrowserScript(script_name="tcc_new", author="@ajpc500", for_new_ui=True),
+    ]
     attributes = CommandAttributes(
         supported_python_versions=["Python 2.7", "Python 3.8"],
         supported_os=[

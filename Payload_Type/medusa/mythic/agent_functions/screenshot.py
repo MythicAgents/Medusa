@@ -23,7 +23,10 @@ class ScreenshotCommand(CommandBase):
     parameters = []
     attackmapping = ["T1113"]
     argument_class = ScreenshotArguments
-    browser_script = BrowserScript(script_name="screenshot", author="@its_a_feature_")
+    browser_script = [ 
+        BrowserScript(script_name="screenshot", author="@its_a_feature_"),
+        BrowserScript(script_name="screenshot_new", author="@its_a_feature_", for_new_ui=True)
+    ]
     attributes = CommandAttributes(
         filter_by_build_parameter={
             "python_version": "Python 2.7"

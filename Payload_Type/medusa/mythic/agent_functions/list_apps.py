@@ -25,7 +25,10 @@ class ListAppsCommand(CommandBase):
     author = "@ajpc500"
     argument_class = ListAppsArguments
     attackmapping = []
-    browser_script = [BrowserScript(script_name="list_apps", author="@ajpc500")]
+    browser_script = [
+        BrowserScript(script_name="list_apps", author="@ajpc500"),
+        BrowserScript(script_name="list_apps_new", author="@ajpc500", for_new_ui=True)
+    ]
     attributes = CommandAttributes(
         filter_by_build_parameter={
             "python_version": "Python 2.7"

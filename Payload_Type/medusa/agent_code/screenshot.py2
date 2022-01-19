@@ -47,3 +47,4 @@
                     ]
                 }
                 response = self.postMessageAndRetrieveResponse(data)
+        return { "file_id": initial_response["responses"][0]["file_id"] }

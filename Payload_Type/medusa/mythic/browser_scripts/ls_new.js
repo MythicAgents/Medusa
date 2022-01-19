@@ -1,4 +1,5 @@
 function(task, response){
+  
   if(task.status.includes("error")){
     const combined = response.reduce( (prev, cur) => {
         return prev + cur;
@@ -30,7 +31,7 @@ function(task, response){
     try{
       data = JSON.parse(response[0].replace((new RegExp("'", 'g')), '"').replace((new RegExp("True", 'g')), 'true').replace((new RegExp("False", 'g')), 'false'));
     }catch(error){
-      const combined = responses.reduce( (prev, cur) => {
+      const combined = response.reduce( (prev, cur) => {
           return prev + cur;
       }, "");
       return {'plaintext': combined};
