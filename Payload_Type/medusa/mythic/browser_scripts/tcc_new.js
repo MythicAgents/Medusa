@@ -60,7 +60,7 @@ function(task, responses){
                                         "value": entries[i],
                                         "leftColumnTitle": "Field",
                                         "rightColumnTitle": "Value",
-                                        "title": "Viewing XATTRs"
+                                        "title": "Viewing All Data"
                                     },
                                 ]
                             }},

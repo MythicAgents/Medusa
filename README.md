@@ -74,6 +74,9 @@ Command | Syntax | Description
 ------- | ------ | -----------
 shinject | `shinject` | Inject shellcode into target PID using CreateRemoteThread (Windows only - adapted from [here](https://gist.github.com/RobinDavid/9214020)).
 load_dll | `load_dll dll_path dll_export` | Load an on-disk DLL and execute an exported function (NOTE: This DLL must return an int value on completion, an msfvenom-created DLL, for example, will kill your agent upon completion).
+list_dlls | `list_dlls [pid]` | Read process memory (PEB) of local or target process to fetch list of loaded DLLs (Python 3 only)
+ps | `ps` | Get limited process information, e.g. PID, process names, architecture and binary paths (Python 3 only)
+ps_full | `ps_full` | Get full process information, including PPID, integrity level and command line (Python 3 only)
 
 
 ## Python Versions
