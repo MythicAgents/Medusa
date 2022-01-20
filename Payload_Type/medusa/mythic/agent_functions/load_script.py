@@ -42,12 +42,15 @@ class LoadScriptCommand(CommandBase):
     )
 
     async def create_tasking(self, task: MythicTask) -> MythicTask:
-        file_resp = await MythicRPC().execute("create_file", task_id=task.id,
-            file=base64.b64encode(task.args.get_arg("file")).decode(),
-            delete_after_fetch=True,
-        )
+        file_resp = await MythicRPC().execute(
+                "get_file", 
+                task_id=task.id,
+                file_id=task.args.get_arg("file"),
+                get_contents=False
+            )
         if file_resp.status == MythicStatus.Success:
-            task.args.add_arg("file", file_resp.response["agent_file_id"])
+            original_file_name = file_resp.response[0]["filename"]
+            task.display_params = f"Loading script: {original_file_name}"
         else:
             raise Exception("Failed to register file: " + file_resp.error)
         return task

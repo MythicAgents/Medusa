@@ -71,14 +71,13 @@ function(task, responses){
                       "table": [
                           {
                               "headers": [
-                                  {"plaintext": "Client", "type": "string"},
-                                  {"plaintext": "Service", "type": "string"},
-                                  {"plaintext": "Client Type", "type": "string"},
-                                  {"plaintext": "Auth Value", "type": "string"},
-                                  {"plaintext": "Auth Reason", "type": "string"},
-                                  {"plaintext": "Last Modified", "type": "string"},
-                                  {"plaintext": "actions", "type": "button", "width": 10},
-
+                                  {"plaintext": "Client", "type": "string", "fillWidth": true},
+                                  {"plaintext": "Service", "type": "string", "fillWidth": true},
+                                  {"plaintext": "Client Type", "type": "string", "width": 160},
+                                  {"plaintext": "Auth Value", "type": "string", "width": 130},
+                                  {"plaintext": "Auth Reason", "type": "string", "width": 135},
+                                  {"plaintext": "Last Modified", "type": "string", "width": 285},
+                                  {"plaintext": "actions", "type": "button", "width": 90, "disableSort": true},
                               ],
                               "rows": output_table,
                               "title": "TCC"

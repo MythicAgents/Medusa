@@ -38,9 +38,10 @@ class ShinjectCommand(CommandBase):
         "Inject shellcode from local file into target process"
     )
     version = 1
-    supported_ui_features = []
+    supported_ui_features = ["process:inject"]
     author = "@ajpc500"
     attackmapping = [ "T1055" ]
+
     argument_class = ShinjectArguments
     attributes = CommandAttributes(
         supported_python_versions=["Python 2.7", "Python 3.8"],
@@ -49,12 +50,14 @@ class ShinjectCommand(CommandBase):
 
     async def create_tasking(self, task: MythicTask) -> MythicTask:
         original_file_name = json.loads(task.original_params)['shellcode']
-        resp = await MythicRPC().execute("create_file",
-                                         task_id=task.id,
-                                         file=base64.b64encode(task.args.get_arg("shellcode")).decode(),
-                                         delete_after_fetch=False)
-        if resp.status == MythicStatus.Success:
-            task.args.add_arg("shellcode", resp.response['agent_file_id'])
+        file_resp = await MythicRPC().execute(
+                "get_file", 
+                task_id=task.id,
+                file_id=task.args.get_arg("file"),
+                get_contents=False
+            )
+        if file_resp.status == MythicStatus.Success:
+            task.args.add_arg("shellcode", file_resp.response['agent_file_id'])
         task.display_params = "Injecting {} into PID {}".format(original_file_name, task.args.get_arg("pid"))
         return task
 
