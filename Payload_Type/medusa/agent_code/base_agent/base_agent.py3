@@ -43,7 +43,8 @@ CRYPTO_HERE
                 if task["completed"] == True:
                     out = { "task_id": task["task_id"], "user_output": task["result"], "completed": True }
                     if task["error"]: out["status"] = "error"
-                    elif "file_browser" in task["parameters"]: out["file_browser"] = task["file_browser"]
+                    for func in ["processes", "file_browser"]: 
+                        if func in task: out[func] = task[func]
                     responses.append(out)
             while not self.socks_out.empty(): socks.append(self.socks_out.get())
             if ((len(responses) > 0) or (len(socks) > 0)):

@@ -38,10 +38,8 @@
             SIZE_T,           
             ctypes.POINTER(SIZE_T))
 
-        PROCESS_VM_READ           = 0x0010
-        PROCESS_QUERY_INFORMATION = 0x0400
-
         MAX_PATH = 260
+        PROCESS_VM_READ           = 0x0010
         PROCESS_QUERY_INFORMATION = 0x0400
 
         ProcessBasicInformation   = 0

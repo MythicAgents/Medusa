@@ -66,7 +66,8 @@ class LoadCommand(CommandBase):
             raise Exception("Failed to find code for '{}'".format(cmd))
 
         resp = await MythicRPC().execute("create_file", task_id=task.id,
-            file=base64.b64encode(cmd_code.encode()).decode()
+            file=base64.b64encode(cmd_code.encode()).decode(),
+            delete_after_fetch=True,
         )
         if resp.status == MythicStatus.Success:
             task.args.add_arg("file_id", resp.response["agent_file_id"])

@@ -38,11 +38,11 @@ function(task, response){
     }
     
     let headers = [
-      {"plaintext": "name", "type": "string"},
-      {"plaintext": "size", "type": "size"},
-      {"plaintext": "last_accessed", "type": "string"},
-      {"plaintext": "last_modified", "type": "string"},
-      {"plaintext": "actions", "type": "button", "width": 10},
+      {"plaintext": "name", "type": "string", "fillWidth": true},
+      {"plaintext": "size", "type": "size", "width": 185},
+      {"plaintext": "last_accessed", "type": "string", "width": 285},
+      {"plaintext": "last_modified", "type": "string", "width": 285},
+      {"plaintext": "actions", "type": "button", "width": 90, "disableSort": true},
     ];
 
     

@@ -64,6 +64,13 @@ class UploadCommand(CommandBase):
                 task.display_params = f"{original_file_name} to {task.args.get_arg('remote_path')}"
             else:
                 raise Exception("Error from Mythic RPC: " + str(file_resp.error))
+        
+            file_resp = await MythicRPC().execute("update_file",
+                file_id=task.args.get_arg("file"),
+                delete_after_fetch=True,
+                comment="Uploaded to disk for upload")
+
+        
         except Exception as e:
             raise Exception("Error from Mythic: " + str(sys.exc_info()[-1].tb_lineno) + str(e))
         return task

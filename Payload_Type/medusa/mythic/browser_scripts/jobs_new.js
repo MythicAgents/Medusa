@@ -21,8 +21,8 @@ function(task, responses){
                       "table": [
                           {
                               "headers": [
-                                  {"plaintext": "command", "type": "string", "width": 9},
-                                  {"plaintext": "task_id", "type": "string"},
+                                  {"plaintext": "command", "type": "string", "fillWidth": true},
+                                  {"plaintext": "task_id", "type": "string", "fillWidth": true},
                               ],
                               "rows": output_table,
                               "title": "Running Jobs"

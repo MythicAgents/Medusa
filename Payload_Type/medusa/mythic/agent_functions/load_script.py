@@ -53,6 +53,13 @@ class LoadScriptCommand(CommandBase):
             task.display_params = f"Loading script: {original_file_name}"
         else:
             raise Exception("Failed to register file: " + file_resp.error)
+        
+        file_resp = await MythicRPC().execute("update_file",
+                file_id=task.args.get_arg("file"),
+                delete_after_fetch=True,
+                comment="Uploaded into memory for load_script")
+        
+        
         return task
 
     async def process_response(self, response: AgentResponse):

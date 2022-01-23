@@ -67,6 +67,7 @@ clipboard | `clipboard` | Output contents of clipboard (uses Objective-C API, as
 list_apps | `list_apps` | List macOS applications (Python 2.7 only, macOS only).
 list_tcc | `list_tcc [path]` | List entries in macOS TCC database (requires full-disk access and Big Sur only atm).
 screenshot | `screenshot` | Take a screenshot (uses Objective-C API, macOS only, Python 2.7 only).
+spawn_jxa | `spawn_jxa` | Spawn an `osascript` process and pipe Javascript content to it.
 
 ### Windows Commands
 
@@ -77,6 +78,7 @@ load_dll | `load_dll dll_path dll_export` | Load an on-disk DLL and execute an e
 list_dlls | `list_dlls [pid]` | Read process memory (PEB) of local or target process to fetch list of loaded DLLs (Python 3 only)
 ps | `ps` | Get limited process information, e.g. PID, process names, architecture and binary paths (Python 3 only)
 ps_full | `ps_full` | Get full process information, including PPID, integrity level and command line (Python 3 only)
+kill | `kill` | Terminate a process by process ID (Python 3 only)
 
 
 ## Python Versions
@@ -108,7 +110,7 @@ def dummyFunction(self, task_id):
       if [task for task in self.taskings if task["task_id"] == task_id][0]["stopped"]: return "Job stopped."
       
       # Send output back to Mythic
-      self.sendTaskOutputUpdate(self, task_id, "We're still running")
+      self.sendTaskOutputUpdate(task_id, "We're still running")
 
       time.sleep(10)
 ```

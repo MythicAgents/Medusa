@@ -4,17 +4,21 @@ import json
 import sys
 import base64
 
-class LoadModuleArguments(TaskArguments):
+class SpawnJxaArguments(TaskArguments):
     def __init__(self, command_line, **kwargs):
         super().__init__(command_line, **kwargs)
         self.args = [
             CommandParameter(
-                name="file", type=ParameterType.File, description="Zipped library to upload"
+                name="file", 
+                type=ParameterType.File, 
+                description="Script file to load"
             ),
             CommandParameter(
-                name="module_name",
-                type=ParameterType.String,
-                description="Name of module to load, e.g. cryptography"
+                name="language", 
+                type=ParameterType.ChooseOne,
+                choices=[ "JavaScript", "AppleScript" ],
+                default_value=[ "JavaScript" ], 
+                description="Language of script to load"
             )
         ]
 
@@ -28,47 +32,41 @@ class LoadModuleArguments(TaskArguments):
             raise ValueError("Missing arguments")
 
 
-class LoadModuleCommand(CommandBase):
-    cmd = "load_module"
+class SpawnJxaCommand(CommandBase):
+    cmd = "spawn_jxa"
     needs_admin = False
-    help_cmd = "load_module"
+    help_cmd = "spawn_jxa"
     description = (
-        "Upload a python library and load it in-memory"
+        "Spawn an osascript process and pipe script content to it."
     )
     version = 1
     author = "@ajpc500"
     attackmapping = []
-    argument_class = LoadModuleArguments
+    argument_class = SpawnJxaArguments
     attributes = CommandAttributes(
         supported_python_versions=["Python 2.7", "Python 3.8"],
-        supported_os=[SupportedOS.MacOS, SupportedOS.Windows, SupportedOS.Linux ],
+        supported_os=[SupportedOS.MacOS ],
     )
 
-
     async def create_tasking(self, task: MythicTask) -> MythicTask:
-        try:
-            file_resp = await MythicRPC().execute(
+        file_resp = await MythicRPC().execute(
                 "get_file", 
                 task_id=task.id,
                 file_id=task.args.get_arg("file"),
                 get_contents=False
             )
-            if file_resp.status == MythicRPCStatus.Success:
-                if len(file_resp.response) > 0:
-                    task.display_params = f"Loading {task.args.get_arg('module_name')} module into memory"
-                elif len(file_resp.response) == 0:
-                    raise Exception("Failed to find the named file. Have you uploaded it before? Did it get deleted?")
-            else:
-                raise Exception("Error from Mythic RPC: " + str(file_resp.error))
+        if file_resp.status == MythicStatus.Success:
+            original_file_name = file_resp.response[0]["filename"]
+            task.display_params = f"Spawning osascript and loading script: {original_file_name}"
+        else:
+            raise Exception("Failed to register file: " + file_resp.error)
         
-            file_resp = await MythicRPC().execute("update_file",
+        file_resp = await MythicRPC().execute("update_file",
                 file_id=task.args.get_arg("file"),
                 delete_after_fetch=True,
-                comment="Uploaded into memory for load_module")
+                comment="Uploaded and piped to new osascript process")
         
         
-        except Exception as e:
-            raise Exception("Error from Mythic: " + str(sys.exc_info()[-1].tb_lineno) + str(e))
         return task
 
     async def process_response(self, response: AgentResponse):

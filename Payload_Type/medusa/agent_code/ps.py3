@@ -27,8 +27,6 @@
         CloseHandle.errcheck = _check_bool
         IsWow64Process = Kernel32.IsWow64Process
 
-        PROCESS_QUERY_INFORMATION = 0x0400
-
         WIN32_PROCESS_TIMES_TICKS_PER_SECOND = 1e7
 
         MAX_PATH = 260
