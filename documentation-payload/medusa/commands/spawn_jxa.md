@@ -7,7 +7,7 @@ hidden = false
 
 ## Summary
 
-This spawns a new instance of `osascript` and uses the subprocess library to pipe uploaded JXA script content to it, preventing the need to drop any script to disk.  
+This spawns a new instance of `osascript` and uses the subprocess library to pipe uploaded AppleScript/JXA script content to it, preventing the need to drop any script to disk.  
 
 - Python Versions Supported: 2.7, 3.8
 - Needs Admin: False  
@@ -22,6 +22,12 @@ This spawns a new instance of `osascript` and uses the subprocess library to pip
 - Required Value: True  
 - Default Value: None  
 
+#### language
+
+- Description: language of script to execute
+- Required Value: True  
+- Default Value: JavaScript  
+
 ## Usage
 
 ```
@@ -33,7 +39,7 @@ spawn_jxa
 The python script is downloaded and executed by piping content to the stdin of the newly spawned `osascript` process.
 
 ```Python
-    def spawn_jxa(self, task_id, file):
+    def spawn_jxa(self, task_id, file, language):
         import os
         import subprocess
         
@@ -53,7 +59,13 @@ The python script is downloaded and executed by piping content to the stdin of t
             cmd_code += base64.b64decode(chunk["chunk_data"]).decode()
             
         if cmd_code: 
-            osapipe = subprocess.Popen(["osascript", "-l", "JavaScript", "-"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, 
+            args = []
+            if language == "JavaScript":
+                args = ["osascript", "-l", "JavaScript", "-"]
+            elif language == "AppleScript":
+                args = ["osascript", "-"]
+
+            osapipe = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, 
                 stderr=subprocess.PIPE)
 
             osapipe.stdin.write(cmd_code.encode())
