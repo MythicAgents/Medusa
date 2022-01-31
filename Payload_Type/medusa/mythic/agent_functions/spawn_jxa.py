@@ -17,7 +17,7 @@ class SpawnJxaArguments(TaskArguments):
                 name="language", 
                 type=ParameterType.ChooseOne,
                 choices=[ "JavaScript", "AppleScript" ],
-                default_value=[ "JavaScript" ], 
+                default_value="JavaScript", 
                 description="Language of script to load"
             )
         ]
