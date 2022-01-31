@@ -3,24 +3,28 @@ from mythic_payloadtype_container.MythicRPC import *
 import json
 
 class MvArguments(TaskArguments):
-    def __init__(self, command_line):
-        super().__init__(command_line)
-        self.args = {
-            "destination": CommandParameter(
+    def __init__(self, command_line, **kwargs):
+        super().__init__(command_line, **kwargs)
+        self.args = [
+            CommandParameter(
                 name="destination",
                 type=ParameterType.String,
-                required=True,
+                parameter_group_info=[ParameterGroupInfo(
+                    required=True,
+                    ui_position=2
+                )],
                 description="Location for moved file or folder",
-                ui_position=2
             ),
-            "source": CommandParameter(
+            CommandParameter(
                 name="source",
                 type=ParameterType.String,
-                required=True,
+                parameter_group_info=[ParameterGroupInfo(
+                    required=True,
+                    ui_position=1
+                )],
                 description="Path to file or folder for moving",
-                ui_position=1
             ),
-        }
+        ]
 
     async def parse_arguments(self):
         if self.command_line[0] != "{":

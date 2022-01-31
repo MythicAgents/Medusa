@@ -5,15 +5,15 @@ import sys
 import base64
 
 class UnloadModuleArguments(TaskArguments):
-    def __init__(self, command_line):
-        super().__init__(command_line)
-        self.args = {
-            "module_name": CommandParameter(
+    def __init__(self, command_line, **kwargs):
+        super().__init__(command_line, **kwargs)
+        self.args = [
+            CommandParameter(
                 name="module_name",
                 type=ParameterType.String,
                 description="Name of module to load, e.g. cryptography"
             )
-        }
+        ]
 
     async def parse_arguments(self):
         if len(self.command_line) > 0:

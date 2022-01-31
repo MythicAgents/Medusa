@@ -5,16 +5,16 @@ import sys
 
 
 class CdArguments(TaskArguments):
-    def __init__(self, command_line):
-        super().__init__(command_line)
-        self.args = {
-            "path": CommandParameter(
+    def __init__(self, command_line, **kwargs):
+        super().__init__(command_line, **kwargs)
+        self.args = [
+            CommandParameter(
                 name="path",
                 type=ParameterType.String,
                 default_value=".",
                 description="Path of file or folder on the current system to cd to",
             )
-        }
+        ]
 
     async def parse_arguments(self):
         if len(self.command_line) > 0:

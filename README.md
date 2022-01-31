@@ -48,10 +48,10 @@ load_module | `load_module` | Load a zipped Python module into memory (adapted f
 load_script | `load_script` | Load and execute a Python script through the agent.
 ls | `ls [. path]` | List files and folders in `[path]` or use `.` for current working directory.
 mv | `mv src_file_or_dir dst_file_or_dir` | Move file or folder to destination.
+pip_freeze | `pip_freeze` | Programmatically list installed packages on system.
 rm | `rm file_or_dir` | Delete file or folder.
 shell | `shell [command]` | Run a shell command which will spawn using subprocess.Popen(). Note that this will wait for command to complete so be careful not to block your agent.
 socks | `socks start/stop [port]` | Start/stop SOCKS5 proxy through Medusa agent. 
-shinject | `shinject` | Inject shellcode into target PID using CreateRemoteThread (Windows only - adapted from [here](https://gist.github.com/RobinDavid/9214020)).
 sleep | `sleep [seconds] [jitter percentage]` | Set the callback interval of the agent in seconds.
 unload | `unload command` | Unload an existing capability from an agent.
 unload_module | `unload_module module_name` | Unload a Python module previously loaded into memory.
@@ -67,6 +67,7 @@ clipboard | `clipboard` | Output contents of clipboard (uses Objective-C API, as
 list_apps | `list_apps` | List macOS applications (Python 2.7 only, macOS only).
 list_tcc | `list_tcc [path]` | List entries in macOS TCC database (requires full-disk access and Big Sur only atm).
 screenshot | `screenshot` | Take a screenshot (uses Objective-C API, macOS only, Python 2.7 only).
+spawn_jxa | `spawn_jxa` | Spawn an `osascript` process and pipe Javascript content to it.
 
 ### Windows Commands
 
@@ -74,6 +75,10 @@ Command | Syntax | Description
 ------- | ------ | -----------
 shinject | `shinject` | Inject shellcode into target PID using CreateRemoteThread (Windows only - adapted from [here](https://gist.github.com/RobinDavid/9214020)).
 load_dll | `load_dll dll_path dll_export` | Load an on-disk DLL and execute an exported function (NOTE: This DLL must return an int value on completion, an msfvenom-created DLL, for example, will kill your agent upon completion).
+list_dlls | `list_dlls [pid]` | Read process memory (PEB) of local or target process to fetch list of loaded DLLs (Python 3 only)
+ps | `ps` | Get limited process information, e.g. PID, process names, architecture and binary paths (Python 3 only)
+ps_full | `ps_full` | Get full process information, including PPID, integrity level and command line (Python 3 only)
+kill | `kill` | Terminate a process by process ID (Python 3 only)
 
 
 ## Python Versions
@@ -105,7 +110,7 @@ def dummyFunction(self, task_id):
       if [task for task in self.taskings if task["task_id"] == task_id][0]["stopped"]: return "Job stopped."
       
       # Send output back to Mythic
-      self.sendTaskOutputUpdate(self, task_id, "We're still running")
+      self.sendTaskOutputUpdate(task_id, "We're still running")
 
       time.sleep(10)
 ```

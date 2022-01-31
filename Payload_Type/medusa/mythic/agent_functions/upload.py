@@ -5,27 +5,28 @@ import sys
 import base64
 
 class UploadArguments(TaskArguments):
-    def __init__(self, command_line):
-        super().__init__(command_line)
-        self.args = {
-            "file": CommandParameter(
-                name="file", type=ParameterType.File, description="file to upload"
+    def __init__(self, command_line, **kwargs):
+        super().__init__(command_line, **kwargs)
+        self.args = [
+            CommandParameter(
+                name="file", 
+                type=ParameterType.File, 
+                description="file to upload"
             ),
-            "remote_path": CommandParameter(
+            CommandParameter(
                 name="remote_path",
                 type=ParameterType.String,
                 description="/remote/path/on/victim.txt",
             ),
-        }
+        ]
 
     async def parse_arguments(self):
-        if len(self.command_line) > 0:
-            if self.command_line[0] == "{":
-                self.load_args_from_json_string(self.command_line)
-            else:
-                raise ValueError("Missing JSON arguments")
-        else:
-            raise ValueError("Missing arguments")
+        if len(self.command_line) == 0:
+            raise ValueError("Must supply arguments")
+        raise ValueError("Must supply named arguments or use the modal")
+
+    async def parse_dictionary(self, dictionary_arguments):
+        self.load_args_from_dictionary(dictionary_arguments)
 
 
 class UploadCommand(CommandBase):
@@ -48,21 +49,28 @@ class UploadCommand(CommandBase):
 
     async def create_tasking(self, task: MythicTask) -> MythicTask:
         try:
-            original_file_name = json.loads(task.original_params)["file"]
-            if len(task.args.get_arg("remote_path")) == 0:
-                task.args.add_arg("remote_path", original_file_name)
-            elif task.args.get_arg("remote_path")[-1] == "/":
-                task.args.add_arg("remote_path", task.args.get_arg("remote_path") + original_file_name)
-            file_resp = await MythicRPC().execute("create_file", task_id=task.id,
-                file=base64.b64encode(task.args.get_arg("file")).decode(),
-                saved_file_name=original_file_name,
-                delete_after_fetch=True,
-            )
-            if file_resp.status == MythicStatus.Success:
-                task.args.add_arg("file", file_resp.response["agent_file_id"])
+            file_resp = await MythicRPC().execute(
+                "get_file", 
+                task_id=task.id,
+                file_id=task.args.get_arg("file"),
+                get_contents=False)
+            if file_resp.status == MythicRPCStatus.Success:
+                original_file_name = file_resp.response[0]["filename"]
+                if len(task.args.get_arg("remote_path")) == 0:
+                    task.args.add_arg("remote_path", original_file_name)
+                elif task.args.get_arg("remote_path")[-1] == "/":
+                    task.args.add_arg("remote_path", task.args.get_arg("remote_path") + original_file_name)
+                    # task.args.add_arg("file", file_resp.response["agent_file_id"])
                 task.display_params = f"{original_file_name} to {task.args.get_arg('remote_path')}"
             else:
-                raise Exception("Error from Mythic: " + str(file_resp.error))
+                raise Exception("Error from Mythic RPC: " + str(file_resp.error))
+        
+            file_resp = await MythicRPC().execute("update_file",
+                file_id=task.args.get_arg("file"),
+                delete_after_fetch=True,
+                comment="Uploaded to disk for upload")
+
+        
         except Exception as e:
             raise Exception("Error from Mythic: " + str(sys.exc_info()[-1].tb_lineno) + str(e))
         return task

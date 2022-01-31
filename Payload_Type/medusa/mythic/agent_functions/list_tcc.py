@@ -5,17 +5,19 @@ import sys
 
 
 class ListTccArguments(TaskArguments):
-    def __init__(self, command_line):
-        super().__init__(command_line)
-        self.args = {
-            "db": CommandParameter(
+    def __init__(self, command_line, **kwargs):
+        super().__init__(command_line, **kwargs)
+        self.args = [
+            CommandParameter(
                 name="db",
                 type=ParameterType.String,
-                required=False,
+                parameter_group_info=[ParameterGroupInfo(
+                    required=True
+                )],
                 default_value="/Library/Application Support/com.apple.TCC/TCC.db",
                 description="Path to TCC database",
             )
-        }
+        ]
 
     async def parse_arguments(self):
         if len(self.command_line) > 0:
@@ -38,7 +40,10 @@ class ListTccCommand(CommandBase):
     attackmapping = []
     supported_ui_features = []
     argument_class = ListTccArguments
-    browser_script = [BrowserScript(script_name="tcc", author="@ajpc500")]
+    browser_script = [
+        BrowserScript(script_name="tcc", author="@ajpc500"),
+        BrowserScript(script_name="tcc_new", author="@ajpc500", for_new_ui=True),
+    ]
     attributes = CommandAttributes(
         supported_python_versions=["Python 2.7", "Python 3.8"],
         supported_os=[

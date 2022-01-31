@@ -4,11 +4,18 @@ from mythic_payloadtype_container.MythicRPC import *
 
 
 class DownloadArguments(TaskArguments):
-    def __init__(self, command_line):
-        super().__init__(command_line)
-        self.args = {
-            "file": CommandParameter(name="File", type=ParameterType.String, description="File to download."),
-        }
+    def __init__(self, command_line, **kwargs):
+        super().__init__(command_line, **kwargs)
+        self.args = [
+            CommandParameter(
+                name="file", 
+                type=ParameterType.String, 
+                description="File to download.",
+                parameter_group_info=[ParameterGroupInfo(
+                    required=True
+                )]
+            ),
+        ]
 
     async def parse_arguments(self):
         if len(self.command_line) == 0:
@@ -22,17 +29,18 @@ class DownloadArguments(TaskArguments):
             filename = self.command_line
         elif self.command_line[0] == "{":
             temp_json = json.loads(self.command_line)
-            if "host" in temp_json:
-                # this means we have tasking from the file browser rather than the popup UI
-                # the medusa agent doesn't currently have the ability to do _remote_ listings, so we ignore it
-                filename = temp_json["path"] + "/" + temp_json["file"]
-            else:
-                raise Exception("Unsupported JSON")
+            # if "host" in temp_json:
+            #     # this means we have tasking from the file browser rather than the popup UI
+            #     # the medusa agent doesn't currently have the ability to do _remote_ listings, so we ignore it
+            # filename = temp_json["path"] + "/" + temp_json["file"]
+            filename = temp_json["file"]
+            # else:
+            #     raise Exception("Unsupported JSON")
         else:
             filename = self.command_line
 
         if filename != "":
-            self.args["file"].value = filename
+            self.args[0].value = filename
         
 
 class DownloadCommand(CommandBase):
@@ -47,7 +55,10 @@ class DownloadCommand(CommandBase):
     parameters = []
     attackmapping = ["T1020", "T1030", "T1041"]
     argument_class = DownloadArguments
-    browser_script = BrowserScript(script_name="download", author="@its_a_feature_")
+    browser_script = [
+        BrowserScript(script_name="download", author="@its_a_feature_"),
+        BrowserScript(script_name="download_new", author="@its_a_feature_", for_new_ui=True)
+    ]    
     attributes = CommandAttributes(
         supported_python_versions=["Python 2.7", "Python 3.8"],
         supported_os=[SupportedOS.MacOS, SupportedOS.Windows, SupportedOS.Linux ],

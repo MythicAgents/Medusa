@@ -5,16 +5,18 @@ import sys
 
 
 class LsArguments(TaskArguments):
-    def __init__(self, command_line):
-        super().__init__(command_line)
-        self.args = {
-            "path": CommandParameter(
+    def __init__(self, command_line, **kwargs):
+        super().__init__(command_line, **kwargs)
+        self.args = [
+            CommandParameter(
                 name="path",
                 type=ParameterType.String,
-                required=False,
+                parameter_group_info=[ParameterGroupInfo(
+                    required=False
+                )],
                 description="Path of file or folder on the current system to list",
             )
-        }
+        ]
 
     async def parse_arguments(self):
         if len(self.command_line) > 0:
@@ -41,7 +43,10 @@ class LsCommand(CommandBase):
     supported_ui_features = ["file_browser:list"]
     is_file_browse = True
     argument_class = LsArguments
-    browser_script = [BrowserScript(script_name="ls", author="@its_a_feature_")]
+    browser_script = [
+        BrowserScript(script_name="ls", author="@its_a_feature_"),
+        BrowserScript(script_name="ls_new", author="@its_a_feature_", for_new_ui=True)
+    ]
     attributes = CommandAttributes(
         supported_python_versions=["Python 2.7", "Python 3.8"],
         supported_os=[SupportedOS.MacOS, SupportedOS.Windows, SupportedOS.Linux ],

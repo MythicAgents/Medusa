@@ -2,9 +2,9 @@ from mythic_payloadtype_container.MythicCommandBase import *
 from mythic_payloadtype_container.MythicRPC import *
 
 class ListAppsArguments(TaskArguments):
-    def __init__(self, command_line):
-        super().__init__(command_line)
-        self.args = {}
+    def __init__(self, command_line, **kwargs):
+        super().__init__(command_line, **kwargs)
+        self.args = []
 
     async def parse_arguments(self):
         pass
@@ -25,8 +25,14 @@ class ListAppsCommand(CommandBase):
     author = "@ajpc500"
     argument_class = ListAppsArguments
     attackmapping = []
-    browser_script = [BrowserScript(script_name="list_apps", author="@ajpc500")]
+    browser_script = [
+        BrowserScript(script_name="list_apps", author="@ajpc500"),
+        BrowserScript(script_name="list_apps_new", author="@ajpc500", for_new_ui=True)
+    ]
     attributes = CommandAttributes(
+        filter_by_build_parameter={
+            "python_version": "Python 2.7"
+        },
         supported_python_versions=["Python 2.7"],
         supported_os=[SupportedOS.MacOS],
     )

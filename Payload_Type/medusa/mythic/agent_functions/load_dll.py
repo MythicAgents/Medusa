@@ -3,24 +3,28 @@ from mythic_payloadtype_container.MythicRPC import *
 import json
 
 class LoadDllArguments(TaskArguments):
-    def __init__(self, command_line):
-        super().__init__(command_line)
-        self.args = {
-            "dllpath": CommandParameter(
+    def __init__(self, command_line, **kwargs):
+        super().__init__(command_line, **kwargs)
+        self.args = [
+            CommandParameter(
                 name="dllpath",
                 type=ParameterType.String,
-                required=True,
+                parameter_group_info=[ParameterGroupInfo(
+                    required=True,
+                    ui_position=1
+                )],
                 description="Location of on-disk DLL",
-                ui_position=1
             ),
-            "dllexport": CommandParameter(
+            CommandParameter(
                 name="dllexport",
                 type=ParameterType.String,
-                required=True,
+                parameter_group_info=[ParameterGroupInfo(
+                    required=True,
+                    ui_position=2
+                )],
                 description="Export of target DLL",
-                ui_position=2
             ),
-        }
+        ]
 
     async def parse_arguments(self):
         if self.command_line[0] != "{":

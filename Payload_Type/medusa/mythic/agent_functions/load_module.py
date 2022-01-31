@@ -5,18 +5,18 @@ import sys
 import base64
 
 class LoadModuleArguments(TaskArguments):
-    def __init__(self, command_line):
-        super().__init__(command_line)
-        self.args = {
-            "file": CommandParameter(
+    def __init__(self, command_line, **kwargs):
+        super().__init__(command_line, **kwargs)
+        self.args = [
+            CommandParameter(
                 name="file", type=ParameterType.File, description="Zipped library to upload"
             ),
-            "module_name": CommandParameter(
+            CommandParameter(
                 name="module_name",
                 type=ParameterType.String,
                 description="Name of module to load, e.g. cryptography"
             )
-        }
+        ]
 
     async def parse_arguments(self):
         if len(self.command_line) > 0:
@@ -47,15 +47,26 @@ class LoadModuleCommand(CommandBase):
 
     async def create_tasking(self, task: MythicTask) -> MythicTask:
         try:
-            file_resp = await MythicRPC().execute("create_file", task_id=task.id,
-                file=base64.b64encode(task.args.get_arg("file")).decode(),
-                delete_after_fetch=True,
+            file_resp = await MythicRPC().execute(
+                "get_file", 
+                task_id=task.id,
+                file_id=task.args.get_arg("file"),
+                get_contents=False
             )
-            if file_resp.status == MythicStatus.Success:
-                task.args.add_arg("file", file_resp.response["agent_file_id"])
-                task.display_params = f"Loading {task.args.get_arg('module_name')} module into memory"
+            if file_resp.status == MythicRPCStatus.Success:
+                if len(file_resp.response) > 0:
+                    task.display_params = f"Loading {task.args.get_arg('module_name')} module into memory"
+                elif len(file_resp.response) == 0:
+                    raise Exception("Failed to find the named file. Have you uploaded it before? Did it get deleted?")
             else:
-                raise Exception("Error from Mythic: " + str(file_resp.error))
+                raise Exception("Error from Mythic RPC: " + str(file_resp.error))
+        
+            file_resp = await MythicRPC().execute("update_file",
+                file_id=task.args.get_arg("file"),
+                delete_after_fetch=True,
+                comment="Uploaded into memory for load_module")
+        
+        
         except Exception as e:
             raise Exception("Error from Mythic: " + str(sys.exc_info()[-1].tb_lineno) + str(e))
         return task

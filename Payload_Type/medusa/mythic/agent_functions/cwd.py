@@ -3,9 +3,9 @@ import json
 from mythic_payloadtype_container.MythicRPC import *
 
 class GetCwdArguments(TaskArguments):
-    def __init__(self, command_line):
-        super().__init__(command_line)
-        self.args = {}
+    def __init__(self, command_line, **kwargs):
+        super().__init__(command_line, **kwargs)
+        self.args = []
 
     async def parse_arguments(self):
         pass

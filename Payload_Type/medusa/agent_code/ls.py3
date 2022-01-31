@@ -9,8 +9,9 @@
             "host": socket.gethostname(),
             "is_file": target_is_file,
             "permissions": {"octal": oct(file_details.st_mode)[-3:]},
-            "name": target_name if target_name != "." \
-                    else os.path.basename(self.current_directory.rstrip(os.sep)),            "parent_path": os.path.abspath(os.path.join(file_path, os.pardir)),
+            "name": target_name if target_name not in [".", "" ] \
+                    else os.path.basename(self.current_directory.rstrip(os.sep)),        
+            "parent_path": os.path.abspath(os.path.join(file_path, os.pardir)),
             "success": True,
             "access_time": time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(file_details.st_atime)),
             "modify_time": time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(file_details.st_mtime)),
@@ -36,4 +37,5 @@
         file_browser["files"] = files
         task = [task for task in self.taskings if task["task_id"] == task_id]
         task[0]["file_browser"] = file_browser
-        return { "files": files }
+        return { "files": files, "parent_path": os.path.abspath(os.path.join(file_path, os.pardir)), "name":  target_name if target_name not in  [".", ""] \
+                    else os.path.basename(self.current_directory.rstrip(os.sep))  }
