@@ -7,7 +7,7 @@ hidden = false
 
 ## Summary
 
-This uses the Python `sqlite` library to query TCC databases and return the contentss.
+This uses the Python `sqlite` library to query TCC databases and return the contents.
 
 - Python Versions Supported: 2.7, 3.8
 - Needs Admin: False  
