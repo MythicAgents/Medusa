@@ -36,7 +36,7 @@ function(task, responses){
                         "headers": [
                             {"plaintext": "Backup File", "type": "string", "fillWidth": true},
                             {"plaintext": "Original File", "type": "string", "fillWidth": true},
-                            {"plaintext": "Size", "type": "string", "fillWidth": 80},
+                            {"plaintext": "Size", "type": "string", "width": 80},
                             {"plaintext": "Modified Time", "type": "string", "width": 285},
                             {"plaintext": "Created Time", "type": "string", "width": 285},
                             {"plaintext": "Type", "type": "string", "fillWidth": 80},
