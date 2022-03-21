@@ -21,13 +21,10 @@ class VscodeListRecentArguments(TaskArguments):
 
     async def parse_arguments(self):
         if len(self.command_line) > 0:
-            if self.command_line[0] == '{':
-                temp_json = json.loads(self.command_line)
-                self.add_arg("db", temp_json["db"])
-            else:
-                self.add_arg("db", self.command_line)
-        else:
-            self.add_arg("db", "")
+            self.add_arg("db", self.command_line)
+        
+    async def parse_dictionary(self, dictionary_arguments):
+        self.load_args_from_dictionary(dictionary_arguments)
 
 class VscodeListRecentCommand(CommandBase):
     cmd = "vscode_list_recent"

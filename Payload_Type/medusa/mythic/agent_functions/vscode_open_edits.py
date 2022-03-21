@@ -21,13 +21,10 @@ class VscodeOpenEditsArguments(TaskArguments):
 
     async def parse_arguments(self):
         if len(self.command_line) > 0:
-            if self.command_line[0] == '{':
-                temp_json = json.loads(self.command_line)
-                self.add_arg("backups_path", temp_json["backups_path"])
-            else:
-                self.add_arg("backups_path", self.command_line)
-        else:
-            self.add_arg("backups_path", "")
+            self.add_arg("backups_path", self.command_line)
+        
+    async def parse_dictionary(self, dictionary_arguments):
+        self.load_args_from_dictionary(dictionary_arguments)
 
 class VscodeOpenEditsCommand(CommandBase):
     cmd = "vscode_open_edits"
