@@ -21,18 +21,24 @@ function(task, responses){
             for(let i = 0; i < entries.length; i++){
 
                 var icon = "";
+                var rs = {};
+
                 if (entries[i]["type"] == "folder") {
                     icon = 'closedFolder';
+                    rs = folder;
                 } else {
                     icon = 'code/source';
+                    rs = file;
                 }
+
+                
 
                 output_table.push({
                     "Name":{
                         "plaintext": entries[i]["path"],
                         "startIcon": icon
                     },
-                    "rowStyle": data["files"][i]["is_file"] ? file:  folder,
+                    "rowStyle": rs,
                 })
             }
             return {
