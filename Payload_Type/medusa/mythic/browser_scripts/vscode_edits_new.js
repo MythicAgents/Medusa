@@ -39,7 +39,7 @@ function(task, responses){
                             {"plaintext": "Size", "type": "string", "width": 80},
                             {"plaintext": "Modified Time", "type": "string", "width": 285},
                             {"plaintext": "Created Time", "type": "string", "width": 285},
-                            {"plaintext": "Type", "type": "string", "fillWidth": 80},
+                            {"plaintext": "Type", "type": "string", "width": 80},
                         ],
                         "rows": output_table,
                         "title": "Unsaved VSCode Edits"
