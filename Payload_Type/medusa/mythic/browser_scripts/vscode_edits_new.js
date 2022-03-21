@@ -21,7 +21,7 @@ function(task, responses){
             for(let i = 0; i < entries.length; i++){
 
                 output_table.push({
-                    "Backup File":{ "plaintext": entries[i]["backup"] },
+                    "Backup File":{ "plaintext": entries[i]["backup"], "copyIcon": true },
                     "Original File":{ "plaintext": entries[i]["original"] },
                     "Size":{ "plaintext": entries[i]["size"] },
                     "Modified Time":{ "plaintext": entries[i]["mtime"] },
@@ -37,8 +37,8 @@ function(task, responses){
                             {"plaintext": "Backup File", "type": "string", "fillWidth": true},
                             {"plaintext": "Original File", "type": "string", "fillWidth": true},
                             {"plaintext": "Size", "type": "string", "width": 80},
-                            {"plaintext": "Modified Time", "type": "string", "width": 285},
-                            {"plaintext": "Created Time", "type": "string", "width": 285},
+                            {"plaintext": "Modified Time", "type": "string", "width": 200},
+                            {"plaintext": "Created Time", "type": "string", "width": 200},
                             {"plaintext": "Type", "type": "string", "width": 80},
                         ],
                         "rows": output_table,
