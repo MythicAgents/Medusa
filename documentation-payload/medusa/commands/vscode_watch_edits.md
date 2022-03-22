@@ -32,7 +32,7 @@ Continuously poll a VSCode backups directory and report any unsaved edits.
 ## Usage
 
 ```
-watch_dir {path to remote dir} poll_interval
+vscode_watch_edits [path to remote dir] [poll_interval]
 ```
 
 

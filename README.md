@@ -68,6 +68,9 @@ list_apps | `list_apps` | List macOS applications (Python 2.7 only, macOS only).
 list_tcc | `list_tcc [path]` | List entries in macOS TCC database (requires full-disk access and Big Sur only atm).
 screenshot | `screenshot` | Take a screenshot (uses Objective-C API, macOS only, Python 2.7 only).
 spawn_jxa | `spawn_jxa` | Spawn an `osascript` process and pipe Javascript content to it.
+vscode_list_recent | `vscode_list_recent [state_db]` | Lists files and folders recently opened with VSCode.
+vscode_open_edits | `vscode_open_edits [backup_dir_path]` | Lists unsaved changes made to files in VSCode.
+vscode_watch_edits | `vscode_watch_edits [path to remote dir] [poll_interval]` | Poll the VSCode backups directory at a given interval for unsaved edits.
 
 ### Windows Commands
 
