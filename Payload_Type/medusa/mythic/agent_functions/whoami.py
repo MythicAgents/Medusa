@@ -1,5 +1,6 @@
 from mythic_payloadtype_container.MythicCommandBase import *
 
+
 class WhoamiArguments(TaskArguments):
     def __init__(self, command_line):
         super().__init__(command_line)
@@ -7,6 +8,7 @@ class WhoamiArguments(TaskArguments):
 
     async def parse_arguments(self):
         pass
+
 
 class WhoamiCommand(CommandBase):
     cmd = "whoami"
