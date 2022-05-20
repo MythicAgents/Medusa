@@ -14,7 +14,7 @@ class GetPwdCommand(CommandBase):
     cmd = "pwd"
     needs_admin = False
     help_cmd = "pwd"
-    description = "This prins the current working directory"
+    description = 'This prints the current working directory'
     version = 1
     is_exit = False
     is_file_browse = False
