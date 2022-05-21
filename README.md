@@ -47,6 +47,7 @@ load | `load command` | Load a new capability into an agent.
 load_module | `load_module` | Load a zipped Python module into memory (adapted from [here](https://github.com/sulinx/remote_importer) and [here](https://github.com/EmpireProject/EmPyre/blob/master/data/agent/agent.py#L464)).
 load_script | `load_script` | Load and execute a Python script through the agent.
 ls | `ls [. path]` | List files and folders in `[path]` or use `.` for current working directory.
+mkdir | `mkdir` | Creates a new folder.
 mv | `mv src_file_or_dir dst_file_or_dir` | Move file or folder to destination.
 pip_freeze | `pip_freeze` | Programmatically list installed packages on system.
 rm | `rm file_or_dir` | Delete file or folder.
