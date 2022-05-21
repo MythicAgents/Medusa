@@ -12,7 +12,7 @@ class MkdirArguments(TaskArguments):
                 parameter_group_info=[ParameterGroupInfo(
                     required=True
                 )],
-                description="Read and output the content of a folder",
+                description="Creates a new folder",
             )
         ]
 
