@@ -16,7 +16,7 @@ class Medusa(PayloadType):
         SupportedOS.Windows, SupportedOS.Linux, SupportedOS.MacOS
     ]
     wrapper = False  
-    wrapped_payloads = []  
+    wrapped_payloads = ["pickle_wrapper"]  
     mythic_encrypts = True
     note = "This payload uses Python to create a simple agent"
     supports_dynamic_loading = True
