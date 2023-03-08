@@ -37,5 +37,6 @@
         file_browser["files"] = files
         task = [task for task in self.taskings if task["task_id"] == task_id]
         task[0]["file_browser"] = file_browser
-        return { "files": files, "parent_path": os.path.abspath(os.path.join(file_path, os.pardir)), "name":  target_name if target_name not in  [".", ""] \
+         output = { "files": files, "parent_path": os.path.abspath(os.path.join(file_path, os.pardir)), "name":  target_name if target_name not in  [".", ""] \
                     else os.path.basename(self.current_directory.rstrip(os.sep))  }
+        json.dumps(output)
