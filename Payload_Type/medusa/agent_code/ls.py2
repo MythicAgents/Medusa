@@ -1,4 +1,3 @@
-    import json
 
     def ls(self, task_id, path, file_browser=False):
         if path == ".": file_path = self.current_directory
