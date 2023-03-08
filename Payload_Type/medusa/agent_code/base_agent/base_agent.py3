@@ -159,6 +159,7 @@ CRYPTO_HERE
         try:
             with urllib.request.urlopen(req) as response:
                 out = base64.b64decode(response.read())
+                response.close()
                 return out.decode() if method == 'GET' else out 
         except: return ""
 
