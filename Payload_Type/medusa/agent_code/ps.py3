@@ -29,9 +29,12 @@
                 # construct path to status file
                 status_path = "/proc/%s/status" % str(pid)
 
-                # read in the status file
-                with open(status_path, "r") as f:
-                    status = f.readlines()
+                # read in the status file - bail if process dies before we read the status file
+                try:
+                    with open(status_path, "r") as f:
+                        status = f.readlines()
+                except Exception as e:
+                    continue
 
                 # construct path to status file
                 cmdline_path = "/proc/%s/cmdline" % str(pid)
