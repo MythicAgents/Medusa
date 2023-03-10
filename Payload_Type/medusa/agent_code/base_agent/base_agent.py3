@@ -113,10 +113,10 @@ CRYPTO_HERE
         hostname = socket.gethostname()
         ip = ''
         if hostname and len(hostname) > 0:
-	    try:
-		ip = socket.gethostbyname(hostname)
-	    except:
-		pass
+            try:
+                ip = socket.gethostbyname(hostname)
+            except:
+                pass
 
         data = {
             "action": "checkin",
