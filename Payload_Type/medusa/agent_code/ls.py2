@@ -1,3 +1,4 @@
+
     def ls(self, task_id, path, file_browser=False):
         if path == ".": file_path = self.current_directory
         else: file_path = path if path[0] == os.sep \
@@ -37,5 +38,6 @@
         file_browser["files"] = files
         task = [task for task in self.taskings if task["task_id"] == task_id]
         task[0]["file_browser"] = file_browser
-        return { "files": files, "parent_path": os.path.abspath(os.path.join(file_path, os.pardir)), "name":  target_name if target_name not in  [".", ""] \
+        output =  { "files": files, "parent_path": os.path.abspath(os.path.join(file_path, os.pardir)), "name":  target_name if target_name not in  [".", ""] \
                     else os.path.basename(self.current_directory.rstrip(os.sep))  }
+        return json.dumps(output)

@@ -1,8 +1,8 @@
     def upload(self, task_id, file, remote_path):
         total_chunks = 1
-        chunk_num = 0
+        chunk_num = 1
         with open(remote_path, "wb") as f:
-            while (chunk_num < total_chunks):
+            while chunk_num < total_chunks + 1:
                 if [task for task in self.taskings if task["task_id"] == task_id][0]["stopped"]:
                     return "Job stopped."
 

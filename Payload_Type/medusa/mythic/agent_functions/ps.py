@@ -27,8 +27,8 @@ class PsCommand(CommandBase):
         BrowserScript(script_name="ps", author="@ajpc500", for_new_ui=True)
     ]
     attributes = CommandAttributes(
-        supported_python_versions=[ "Python 3.8" ],
-        supported_os=[ SupportedOS.Windows ],
+        supported_python_versions=[ "Python 2.7", "Python 3.8" ],
+        supported_os=[ SupportedOS.Windows, SupportedOS.Linux ],
     )
 
     async def create_tasking(self, task: MythicTask) -> MythicTask:
