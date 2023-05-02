@@ -19,7 +19,7 @@ Once installed, restart Mythic to build a new agent.
 - Dynamic loading/unloading of agent functions to limit exposure of agent capabilities on-disk.
 - Loading of Python modules in-memory for use in custom scripts.
 - Cross-platform SOCKS5 proxy
-- maOS clipboard reader, screenshot grabber and TCC database parsing examples
+- macOS clipboard reader, screenshot grabber and TCC database parsing examples
 - File browser compatibility with upload/download
 - Eval() of dynamic Python code
 - Basic Authentication Proxy compatibility
