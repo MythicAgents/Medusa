@@ -166,7 +166,9 @@ CRYPTO_HERE
                 opener = urllib2.build_opener(proxy, handler)
             urllib2.install_opener(opener)
         try:
-            out = base64.b64decode(urllib2.urlopen(req).read())
+            response = urllib2.urlopen(req)
+            out = base64.b64decode(response.read())
+            response.close()
             return out.decode() if method == 'GET' else out
         except: return ""
 
