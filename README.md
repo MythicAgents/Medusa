@@ -7,7 +7,7 @@
 Medusa is a cross-platform agent compatible with both Python 3.8 and Python 2.7.
 
 ## Installation
-To install Medusa, you'll need Mythic installed on a remote computer. You can find installation instructions for Mythic at the [Mythic project page](https://github.com/its-a-feature/Mythic/).
+To install Medusa, you'll need Mythic v3 installed on a remote computer. You can find installation instructions for Mythic at the [Mythic project page](https://github.com/its-a-feature/Mythic/).
 
 From the Mythic install root, run the command:
 
@@ -19,7 +19,7 @@ Once installed, restart Mythic to build a new agent.
 - Dynamic loading/unloading of agent functions to limit exposure of agent capabilities on-disk.
 - Loading of Python modules in-memory for use in custom scripts.
 - Cross-platform SOCKS5 proxy
-- macOS clipboard reader, screenshot grabber and TCC database parsing examples
+- macOS clipboard reader, screenshot grabber and TCC database parsing
 - File browser compatibility with upload/download
 - Eval() of dynamic Python code
 - Basic Authentication Proxy compatibility

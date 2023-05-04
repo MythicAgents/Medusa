@@ -1,2 +1,7 @@
-# pull in the appropriate language's payload container from itsafeaturemythic on dockerhub
-from itsafeaturemythic/python38_payload:0.0.10
+FROM itsafeaturemythic/mythic_base_image:0.0.2
+
+RUN python3 -m pip install mythic-container==0.2.0rc22
+
+WORKDIR /Mythic/
+
+CMD ["python3", "main.py"]
