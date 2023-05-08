@@ -31,4 +31,4 @@
                             open_edit["ctime"] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(json_data["ctime"]/1000))
                             open_edit["type"] = "Edit"
                     open_edits.append(open_edit)
-        return { "edits" : open_edits }
+        return json.dumps({ "edits" : open_edits })

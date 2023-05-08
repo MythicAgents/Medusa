@@ -22,4 +22,4 @@
 
             tcc_results = {}
             tcc_results["entries"] = results
-            return { "tcc": results }
+            return json.dumps({ "tcc": results })

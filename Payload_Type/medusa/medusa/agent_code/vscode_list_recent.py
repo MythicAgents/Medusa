@@ -19,4 +19,4 @@
                         recent_file["path"] = entry["fileUri"].replace("file://", "")
                         recent_file["type"] = "file"
                     recent_files.append(recent_file)
-        return { "recents": recent_files }
+        return json.dumps({ "recents": recent_files })
