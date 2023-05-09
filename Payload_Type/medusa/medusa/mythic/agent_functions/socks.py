@@ -85,7 +85,7 @@ class SocksCommand(CommandBase):
             resp = await SendMythicRPCProxyStartCommand(MythicRPCProxyStartMessage(
                 TaskID=taskData.Task.ID,
                 PortType="socks",
-                Port=taskData.args.get_arg("port")
+                LocalPort=taskData.args.get_arg("port")
             ))
 
             if not resp.Success:
@@ -98,12 +98,11 @@ class SocksCommand(CommandBase):
             else:
                 response.DisplayParams = "Started SOCKS5 server on port {}".format(taskData.args.get_arg("port"))
                 response.TaskStatus = MythicStatus.Success
-                response.Completed = True
         else:
             resp = await SendMythicRPCProxyStopCommand(MythicRPCProxyStopMessage(
                 TaskID=taskData.Task.ID,
                 PortType="socks",
-                Port=taskData.args.get_arg("port")
+                LocalPort=taskData.args.get_arg("port")
             ))
             if not resp.Success:
                 response.TaskStatus = MythicStatus.Error

@@ -17,22 +17,29 @@ class LoadArguments(TaskArguments):
     # async def get_commands(self, callback: dict) -> [str]:
     async def get_commands(self, inputMsg: PTRPCDynamicQueryFunctionMessage) -> PTRPCDynamicQueryFunctionMessageResponse:
         fileResponse = PTRPCDynamicQueryFunctionMessageResponse(Success=False)
-        
-        payloads = await SendMythicRPCPayloadSearch(MythicRPCPayloadSearchMessage(
-            CallbackID=inputMsg.Callback
-        ))
 
-        payload_details = payloads.Payloads[0]
-        payload_os = payload_details.SelectedOS  
-        
-        # python_version = [param.Value for param in payload_details.BuildParameters if param.Name == 'python_version'][0]
+        callbacks = await SendMythicRPCCallbackSearch(MythicRPCCallbackSearchMessage(
+            SearchCallbackID=inputMsg.Callback,
+            AgentCallbackID=inputMsg.Callback,
+        ))
+        if callbacks.Success:
+            payloads = await SendMythicRPCPayloadSearch(MythicRPCPayloadSearchMessage(
+                CallbackID=inputMsg.Callback, PayloadUUID=callbacks.Results[0].RegisteredPayloadUUID
+            ))
+            if payloads.Success:
+                payload_os = payloads.Payloads[0].SelectedOS
+                python_version = [param.Value for param in payloads.Payloads[0].BuildParameters if param.Name == 'python_version'][0]
+            else:
+                logger.error(f"Failed to get payload: {payloads.Error}")
+        else:
+            logger.error(f"Failed to get callback: {callbacks.Error}")
         
         all_cmds = await SendMythicRPCCommandSearch(MythicRPCCommandSearchMessage(
             SearchPayloadTypeName="medusa",
             SearchOS=payload_os,
-            # SearchAttributes={
-            #     "supported_python_versions": ["Python 2.7", "Python 3.8"],
-            # }
+            SearchAttributes={
+                "supported_python_versions": [python_version],
+            },
         ))
 
         loaded_cmds = await SendMythicRPCCallbackSearchCommand(MythicRPCCallbackSearchCommandMessage(
