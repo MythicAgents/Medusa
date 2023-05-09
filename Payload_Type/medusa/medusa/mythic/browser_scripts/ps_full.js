@@ -7,18 +7,18 @@ function(task, response){
     }else if(task.completed){
         if(response.length > 0){
             try{
-                    let data = JSON.parse(response[0].replace((new RegExp("\"", 'g')), '\\\"').replace((new RegExp("'", 'g')), '"'));
+                    let data = JSON.parse(response[0]);
                     let entries = data["processes"];
                     let output_table = [];
   
                     for(let i = 0; i < entries.length; i++){
                       
                       output_table.push({
-                            "PID":{"plaintext": entries[i]["process_id"], "copyIcon": true},
-                            "PPID":{"plaintext": ((!"parent_process_id" in entries[i]) ? ' ' : entries[i]['parent_process_id']) },
+                            "PID":{"plaintext": String(entries[i]["process_id"]), "copyIcon": true},
+                            "PPID":{"plaintext": ((!entries[i].hasOwnProperty("parent_process_id")) ? ' ' : String(entries[i]['parent_process_id'])) },
                             "Name":{"plaintext": ((!"name" in entries[i]) ? ' ' : entries[i]['name']) },
                             "Arch":{"plaintext": ((!"architecture" in entries[i]) ? ' ' : entries[i]['architecture']) },
-                            "Integrity Level":{"plaintext": ((!"integrity_level" in entries[i]) ? ' ' : entries[i]['integrity_level']) },
+                            "Integrity Level":{"plaintext": ((!entries[i].hasOwnProperty("integrity_level")) ? ' ' : String(entries[i]['integrity_level'])) },
                             "Command Line":{"plaintext": ((!"command_line" in entries[i]) ? ' ' : entries[i]['command_line']) },
                             "Bin Path":{"plaintext": ((!"bin_path" in entries[i]) ? ' ' : entries[i]['bin_path']), "copyIcon": true},
                             "actions": {"button": {
@@ -29,7 +29,7 @@ function(task, response){
                                           "name": "List DLLs",
                                           "type": "task",
                                           "ui_feature": "process_dlls:list",
-                                          "parameters": { "process_id": entries[i]["process_id"] }
+                                          "parameters": { "process_id": String(entries[i]["process_id"]) }
                                       },
                                       {
                                         "name": "View Details",

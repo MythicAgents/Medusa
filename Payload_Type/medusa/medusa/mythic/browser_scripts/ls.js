@@ -1,5 +1,4 @@
 function(task, response){
-  
   if(task.status.includes("error")){
     const combined = response.reduce( (prev, cur) => {
         return prev + cur;
@@ -29,7 +28,7 @@ function(task, response){
     let data = "";
 
     try{
-      data = JSON.parse(response[0].replace((new RegExp("'", 'g')), '"').replace((new RegExp("True", 'g')), 'true').replace((new RegExp("False", 'g')), 'false'));
+      data = JSON.parse(response[0]);
     }catch(error){
       const combined = response.reduce( (prev, cur) => {
           return prev + cur;
@@ -92,9 +91,9 @@ function(task, response){
             "plaintext": data["files"][i]["name"],
             "startIcon": icon
           },
-          "size": {"plaintext": data["files"][i]["size"]},
-          "last_accessed": {"plaintext": data["files"][i]["access_time"]},
-          "last_modified": {"plaintext": data["files"][i]["modify_time"]},
+          "size": {"plaintext": String(data["files"][i]["size"])},
+          "last_accessed": {"plaintext": String(new Date(data["files"][i]["access_time"]))},
+          "last_modified": {"plaintext": String(new Date(data["files"][i]["modify_time"]))},
           "actions": {"button": {
           "name": "Actions",
           "type": "menu",
