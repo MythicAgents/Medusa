@@ -17,9 +17,24 @@ class LoadArguments(TaskArguments):
     # async def get_commands(self, callback: dict) -> [str]:
     async def get_commands(self, inputMsg: PTRPCDynamicQueryFunctionMessage) -> PTRPCDynamicQueryFunctionMessageResponse:
         fileResponse = PTRPCDynamicQueryFunctionMessageResponse(Success=False)
-        all_cmds = await SendMythicRPCCommandSearch(MythicRPCCommandSearchMessage(
-            SearchPayloadTypeName="medusa"
+        
+        payloads = await SendMythicRPCPayloadSearch(MythicRPCPayloadSearchMessage(
+            CallbackID=inputMsg.Callback
         ))
+
+        payload_details = payloads.Payloads[0]
+        payload_os = payload_details.SelectedOS  
+        
+        # python_version = [param.Value for param in payload_details.BuildParameters if param.Name == 'python_version'][0]
+        
+        all_cmds = await SendMythicRPCCommandSearch(MythicRPCCommandSearchMessage(
+            SearchPayloadTypeName="medusa",
+            SearchOS=payload_os,
+            # SearchAttributes={
+            #     "supported_python_versions": ["Python 2.7", "Python 3.8"],
+            # }
+        ))
+
         loaded_cmds = await SendMythicRPCCallbackSearchCommand(MythicRPCCallbackSearchCommandMessage(
             CallbackID=inputMsg.Callback
         ))
@@ -34,23 +49,13 @@ class LoadArguments(TaskArguments):
         
         logger.info(all_cmds_names)
         logger.info(loaded_cmds_names)
-        
-        # commands = [command for command in all_cmds.Commands if \
-        #     command.Name not in loaded_cmds_names and \
-        #     ...    
-        # ]
-
+    
         diff = all_cmds_names.difference(loaded_cmds_names)
         fileResponse.Success = True
         fileResponse.Choices = sorted(diff)
         return fileResponse
 
-        # resp = await MythicRPC().execute("get_commands", callback_id=callback["id"])
-        # if resp.status == MythicRPCStatus.Success:
-        #     return [ cmd["cmd"] for cmd in resp.response if callback["build_parameters"]["python_version"] in cmd["attributes"]["supported_python_versions"]]
-        # else:
-        #     return []
-
+    
     async def parse_arguments(self):
         if self.command_line[0] != "{":
             self.add_arg("command", self.command_line)
