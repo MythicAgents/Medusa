@@ -118,22 +118,6 @@ class SocksCommand(CommandBase):
         return response
 
 
-
-
-    # async def create_tasking(self, task: MythicTask) -> MythicTask:
-    #     if task.args.get_arg("action") == "start":
-    #         resp = await MythicRPC().execute("control_socks",
-    #             task_id=task.id, start=True, port=task.args.get_arg("port"))
-    #         task.display_params = "Starting SOCKS5 proxy on port {}".format(task.args.get_arg("port"))
-    #     else:
-    #         resp = await MythicRPC().execute("control_socks",
-    #             task_id=task.id, stop=True, port=task.args.get_arg("port"))
-    #         task.display_params = "Stopping SOCKS5 proxy"
-    #     if resp.status != MythicStatus.Success:
-    #         task.status = MythicStatus.Error
-    #         raise Exception(resp.error)
-    #     return task
-
     async def process_response(self, task: PTTaskMessageAllData, response: any) -> PTTaskProcessResponseMessageResponse:
         resp = PTTaskProcessResponseMessageResponse(TaskID=task.Task.ID, Success=True)
         return resp

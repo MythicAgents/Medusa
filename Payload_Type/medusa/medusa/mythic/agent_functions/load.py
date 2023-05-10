@@ -20,8 +20,12 @@ class LoadArguments(TaskArguments):
 
         callbacks = await SendMythicRPCCallbackSearch(MythicRPCCallbackSearchMessage(
             SearchCallbackID=inputMsg.Callback,
-            AgentCallbackID=inputMsg.Callback,
+            AgentCallbackID=inputMsg.Callback
         ))
+        
+        payload_os = ""
+        python_version = ""
+
         if callbacks.Success:
             payloads = await SendMythicRPCPayloadSearch(MythicRPCPayloadSearchMessage(
                 CallbackID=inputMsg.Callback, PayloadUUID=callbacks.Results[0].RegisteredPayloadUUID
@@ -30,9 +34,9 @@ class LoadArguments(TaskArguments):
                 payload_os = payloads.Payloads[0].SelectedOS
                 python_version = [param.Value for param in payloads.Payloads[0].BuildParameters if param.Name == 'python_version'][0]
             else:
-                logger.error(f"Failed to get payload: {payloads.Error}")
+                raise Exception(f"Failed to get payload: {payloads.Error}")
         else:
-            logger.error(f"Failed to get callback: {callbacks.Error}")
+            raise Exception(f"Failed to get callback: {callbacks.Error}")
         
         all_cmds = await SendMythicRPCCommandSearch(MythicRPCCommandSearchMessage(
             SearchPayloadTypeName="medusa",
