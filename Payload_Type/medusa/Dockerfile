@@ -1,2 +1,5 @@
-# pull in the appropriate language's payload container from itsafeaturemythic on dockerhub
-from itsafeaturemythic/python38_payload:0.0.10
+FROM itsafeaturemythic/mythic_python_base:latest
+
+WORKDIR /Mythic/
+
+CMD ["python3", "main.py"]

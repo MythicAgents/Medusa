@@ -1,0 +1,10 @@
+    def list_apps(self, task_id):
+        import Cocoa
+        app_json = []
+        apps = Cocoa.NSWorkspace.sharedWorkspace().runningApplications()
+        for app in apps:
+            try:
+                app_data = { "pid": str(app.processIdentifier()), "name": str(app.localizedName()), "exec_url": str(app.executableURL()) }
+                app_json.append(app_data)
+            except: pass
+        return json.dumps({ "apps": app_json })
