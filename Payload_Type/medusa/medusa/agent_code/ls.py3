@@ -4,7 +4,7 @@
                 else os.path.join(self.current_directory,path)
         file_details = os.stat(file_path)
         target_is_file = os.path.isfile(file_path)
-        target_name = os.path.basename(file_path.rstrip(os.sep))
+        target_name = os.path.basename(file_path.rstrip(os.sep)) if file_path != os.sep else os.sep
         file_browser = {
             "host": socket.gethostname(),
             "is_file": target_is_file,
