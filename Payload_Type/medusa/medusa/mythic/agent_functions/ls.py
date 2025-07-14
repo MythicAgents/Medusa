@@ -23,10 +23,15 @@ class LsArguments(TaskArguments):
             if self.command_line[0] == '{':
                 temp_json = json.loads(self.command_line)
                 if "host" in temp_json:
-                    self.add_arg("path", temp_json["path"] + "/" + temp_json["file"])
+                    if "path" in temp_json and "file" in temp_json:
+                        self.add_arg("path", temp_json["path"] + "/" + temp_json["file"])
+                    else:
+                        self.add_arg("path", ".")
                     self.add_arg("file_browser", True, type=ParameterType.Boolean)
-                else:
+                elif "path" in temp_json:
                     self.add_arg("path", temp_json["path"])
+                else:
+                    self.add_arg("path", ".")
             else:
                 self.add_arg("path", self.command_line)
         else:
