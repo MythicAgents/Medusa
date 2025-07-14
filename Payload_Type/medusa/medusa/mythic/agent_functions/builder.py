@@ -46,7 +46,7 @@ class Medusa(PayloadType):
             parameter_type=BuildParameterType.ChooseOne,
             description="XOR and Base64-encode agent code",
             choices=["Yes", "No"],
-            default_value="Yes"
+            default_value="No"
         ),
         BuildParameter(
             name="https_check",
