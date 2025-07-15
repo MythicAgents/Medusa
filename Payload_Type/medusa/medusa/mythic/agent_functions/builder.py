@@ -54,7 +54,14 @@ class Medusa(PayloadType):
             description="Verify HTTPS certificate (if HTTP, leave yes)",
             choices=["Yes", "No"],
             default_value="Yes"
-        )
+        ),
+          BuildParameter(
+            name="domain_check",
+            parameter_type=BuildParameterType.String,
+            description="Verify AD domain (if not joined, will exit)",
+            value="",
+            default_value=""
+          )
     ]
     c2_profiles = ["http"]
     
@@ -112,7 +119,11 @@ class Medusa(PayloadType):
             base_code = base_code.replace("CRYPTO_HERE", crypto_code)
             base_code = base_code.replace("UUID_HERE", self.uuid)
             base_code = base_code.replace("#COMMANDS_HERE", command_code)
-            
+            domain_check = ""
+            if self.get_parameter("domain_check") != "":
+                domain_check = self.get_parameter("domain_check")
+            base_code = base_code.replace("#DOMAIN_CHECK_HERE", domain_check)
+
             for c2 in self.c2info:
                 profile = c2.get_c2profile()["name"]
                 

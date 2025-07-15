@@ -39,7 +39,8 @@ cwd | `cwd` | Print working directory.
 download | `download [path]` | Download a file from the target system.
 exit | `exit` | Exit a callback.
 env | `env` | Print environment variables.
-eval_code | `eval_code [commands]` | Execute python code and return output.
+eval_code | `eval_code [commands]` | Evaluate python code and return output.
+exec_code | `exec_code [commands]` | Execute python code and return output.
 jobkill | `jobkill [task id]` | Send stop signal to long running task.
 jobs | `jobs` | List long-running tasks, such as downloads.
 list_modules | `list_modules [module_name]` | Lists in-memory modules or the full file listing for a specific module.

