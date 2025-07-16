@@ -46,7 +46,7 @@ class Medusa(PayloadType):
             parameter_type=BuildParameterType.ChooseOne,
             description="Choose obfuscation method for agent code",
             choices=["None", "Random", "GetAttr", "Lambda", "Map"],
-            default_value="None"
+            default_value="Random"
         ),
         BuildParameter(
             name="https_check",
@@ -122,12 +122,51 @@ class Medusa(PayloadType):
             domain_check = ""
             if self.get_parameter("domain_check") != "":
                 domain_check = self.get_parameter("domain_check")
-            base_code = base_code.replace("#DOMAIN_CHECK_HERE", domain_check)
+            base_code = base_code.replace("DOMAIN_CHECK_HERE", domain_check)
 
             for c2 in self.c2info:
                 profile = c2.get_c2profile()["name"]
+                c2_params = c2.get_parameters_dict()
                 
-                for key, val in c2.get_parameters_dict().items():
+                # Handle proxy parameter mapping for new ProxyHosts format
+                proxy_hosts = []
+                if "proxy_hosts" in c2_params and c2_params["proxy_hosts"]:
+                    # New proxy_hosts parameter - use it directly
+                    proxy_hosts = c2_params["proxy_hosts"] if isinstance(c2_params["proxy_hosts"], list) else []
+                elif "proxy_host" in c2_params and c2_params["proxy_host"]:
+                    # Fallback to old proxy_host + proxy_port format
+                    proxy_host = c2_params["proxy_host"]
+                    proxy_port = c2_params.get("proxy_port", "")
+                    
+                    if proxy_port:
+                        # Construct proxy URL from host and port
+                        if proxy_host.startswith("http"):
+                            proxy_hosts = [f"{proxy_host}:{proxy_port}"]
+                        else:
+                            proxy_hosts = [f"http://{proxy_host}:{proxy_port}"]
+                
+                # Replace the PROXYHOSTS_HERE placeholder with the actual proxy hosts list
+                if proxy_hosts:
+                    proxy_hosts_str = json.dumps(proxy_hosts)
+                else:
+                    proxy_hosts_str = "[]"
+                base_code = base_code.replace("PROXYHOSTS_HERE", proxy_hosts_str)
+                
+                # Also handle individual proxy parameter replacements for backward compatibility
+                if "proxy_host" in c2_params:
+                    base_code = base_code.replace("ProxyHost", c2_params["proxy_host"])
+                if "proxy_port" in c2_params:
+                    base_code = base_code.replace("ProxyPort", c2_params["proxy_port"])
+                if "proxy_user" in c2_params:
+                    base_code = base_code.replace("ProxyUser", c2_params["proxy_user"])
+                if "proxy_pass" in c2_params:
+                    base_code = base_code.replace("ProxyPass", c2_params["proxy_pass"])
+                
+                for key, val in c2_params.items():
+                    # Skip proxy parameters since we handled them above
+                    if key in ["proxy_hosts", "proxy_host", "proxy_port", "proxy_user", "proxy_pass"]:
+                        continue
+                        
                     # if key == "AESPSK":
                     #     base_code = base_code.replace(key, val["enc_key"] if val["enc_key"] is not None else "")
                     # el
