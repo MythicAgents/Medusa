@@ -127,7 +127,7 @@ CRYPTO_HERE
             "os": self.getOSVersion(),
             "user": self.getUsername(),
             "host": hostname,
-            "domain:": socket.getfqdn(),
+            "domain": socket.getfqdn(),
             "pid": os.getpid(),
             "uuid": self.agent_config["PayloadUUID"],
             "architecture": "x64" if sys.maxsize > 2**32 else "x86",
