@@ -1,7 +1,8 @@
     def ps(self, task_id):
-        import os
+        import platform, os
         processes = []
-        if os.name == 'posix':
+        os_type = platform.system().lower()
+        if os_type == 'linux':
 
             def get_user_id_map():
 
@@ -67,8 +68,7 @@
                            "bin_path": cmdline}
 
                 processes.append(process)
-
-        elif os.name == 'nt':
+        elif os_type == 'windows':
 
             import sys, os.path, ctypes, ctypes.wintypes, re
             from ctypes import create_unicode_buffer, GetLastError
@@ -187,6 +187,127 @@
 
                     CloseHandle(hProcess)
                 processes.append(process)
+        elif os_type == 'darwin':
+            import ctypes
+            import ctypes.util
+            import sys
+            import pwd
+
+            libc = ctypes.CDLL(ctypes.util.find_library('c'))
+            libproc = ctypes.CDLL(ctypes.util.find_library('proc'))
+
+            PROC_ALL_PIDS = 1
+            PROC_PIDT_SHORTBSDINFO = 13
+            PROC_PIDPATHINFO_MAXSIZE = 4096
+            MAXCOMLEN = 16
+            CTL_KERN = 1
+            KERN_PROCARGS2 = 49
+
+            class ProcBSDShortInfo(ctypes.Structure):
+                _fields_ = [
+                    ("pbsi_pid", ctypes.c_uint32),                # process id
+                    ("pbsi_ppid", ctypes.c_uint32),               # process parent id
+                    ("pbsi_pgid", ctypes.c_uint32),               # process perp id
+                    ("pbsi_status", ctypes.c_uint32),             # p_stat value
+                    ("pbsi_comm", ctypes.c_char * MAXCOMLEN),     # upto 16 chars of proc name
+                    ("pbsi_flags", ctypes.c_uint32),              # 64bit; emulated etc
+                    ("pbsi_uid", ctypes.c_uint),                  # current uid on process
+                    ("pbsi_gid", ctypes.c_uint),                  # current gid on process
+                    ("pbsi_ruid", ctypes.c_uint),                 # current ruid on process
+                    ("pbsi_rgid", ctypes.c_uint),                 # current tgid on process
+                    ("pbsi_svuid", ctypes.c_uint),                # current svuid on process
+                    ("pbsi_svgid", ctypes.c_uint),                # current svgid on process
+                    ("pbsi_rfu", ctypes.c_uint32),                # reserved
+                ]
+
+            proc_count = libc.proc_listpids(PROC_ALL_PIDS, 0, None, 0)
+    
+            pid_buffer_size = proc_count * ctypes.sizeof(ctypes.c_int)
+            pid_buffer = (ctypes.c_int * (pid_buffer_size // ctypes.sizeof(ctypes.c_int)))()
+            proc_count = libc.proc_listpids(PROC_ALL_PIDS, 0, ctypes.byref(pid_buffer), pid_buffer_size)
+            
+            for i in range(proc_count):
+                pid = pid_buffer[i]
+                if pid == 0:
+                    continue  # Skip kernel process
+
+                try:
+                    path_buffer = ctypes.create_string_buffer(PROC_PIDPATHINFO_MAXSIZE)
+                    ret = libproc.proc_pidpath(pid, path_buffer, PROC_PIDPATHINFO_MAXSIZE)
+                    if ret > 0:
+                        path = path_buffer.value.decode('utf-8')
+                        name = os.path.basename(path)
+
+                    buf = ProcBSDShortInfo()
+                    ret = libproc.proc_pidinfo(pid, PROC_PIDT_SHORTBSDINFO, 0, ctypes.byref(buf), ctypes.sizeof(buf))
+                    if ret > 0:
+                        ppid = buf.pbsi_ppid
+                        uid = buf.pbsi_uid
+                        
+                        if uid == 0:
+                            username = "root"
+                        else:
+                            username = pwd.getpwuid(uid).pw_name if uid else f"unknown({uid})"
+
+                    mib = (ctypes.c_int * 3)()
+                    mib[0] = CTL_KERN
+                    mib[1] = KERN_PROCARGS2
+                    mib[2] = int(pid)
+
+                    buffer_size = ctypes.c_size_t(0)
+                    if libc.sysctl(
+                        ctypes.byref(mib),
+                        ctypes.c_uint32(3),
+                        None,
+                        ctypes.byref(buffer_size),
+                        None,
+                        ctypes.c_size_t(0)
+                    ) == 0:
+                        argc_buffer = (ctypes.c_ubyte * buffer_size.value)()
+                        if libc.sysctl(
+                            ctypes.byref(mib),
+                            ctypes.c_uint32(3),
+                            ctypes.byref(argc_buffer),
+                            ctypes.byref(buffer_size),
+                            None,
+                            ctypes.c_size_t(0)
+                        ) == 0:
+                            argc = int.from_bytes(bytearray(argc_buffer[:4]), sys.byteorder) + 1
+                            args_data = bytearray(argc_buffer[4:])
+
+                            arguments = []
+                            current = 0
+                            for idx in range(argc):
+                                # Skip null bytes
+                                while current < len(args_data) and args_data[current] == 0:
+                                    current += 1
+                                if current >= len(args_data):
+                                    break
+                                try:
+                                    next_null = args_data.index(0, current)
+                                except ValueError:
+                                    next_null = len(args_data)
+                                arg = args_data[current:next_null].decode('utf-8', errors='ignore')
+                                if idx != 0:
+                                    arguments.append(arg)
+                                current = next_null + 1
+
+                            command_line = ' '.join(arguments)
+
+                    processes.append({
+                        "process_id": pid,
+                        "parent_process_id": ppid,  
+                        "user_id": uid,  
+                        "name": name,  
+                        "bin_path": path,
+                        "command_line": command_line,
+                        "user": username
+                    })
+                except Exception as e:
+                    print(f"Error processing PID {pid}: {e}")
+
+        else:
+            return f"{os.name} is not supported"
 
         task = [task for task in self.taskings if task["task_id"] == task_id]
         task[0]["processes"] = processes

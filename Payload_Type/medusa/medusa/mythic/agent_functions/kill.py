@@ -38,9 +38,15 @@ class KillCommand(CommandBase):
         supported_os=[ SupportedOS.Windows ],
     )
 
-    async def create_tasking(self, task: MythicTask) -> MythicTask:
-        task.display_params = f"Terminating process with PID: " + str(task.args.get_arg("process_id"))
-        return task
+    async def create_go_tasking(self, taskData: MythicCommandBase.PTTaskMessageAllData) -> MythicCommandBase.PTTaskCreateTaskingMessageResponse:
+        response = MythicCommandBase.PTTaskCreateTaskingMessageResponse(
+            TaskID=taskData.Task.ID,
+            Success=True,
+        )
+
+        response.DisplayParams = f"Terminating process with PID: {taskData.args.get_arg('process_id')}"
+
+        return response
 
     async def process_response(self, task: PTTaskMessageAllData, response: any) -> PTTaskProcessResponseMessageResponse:
         resp = PTTaskProcessResponseMessageResponse(TaskID=task.Task.ID, Success=True)

@@ -43,13 +43,19 @@ class VscodeOpenEditsCommand(CommandBase):
             SupportedOS.MacOS
         ],
     )
-
-    async def create_tasking(self, task: MythicTask) -> MythicTask:
-        if task.args.get_arg("backups_path"):
-            task.display_params = "Listing edited and unsaved files in VSCode from backup directory: " + task.args.get_arg("backups_path")
+    
+    async def create_go_tasking(self, taskData: PTTaskMessageAllData) -> PTTaskCreateTaskingMessageResponse:
+        response = PTTaskCreateTaskingMessageResponse(
+            TaskID=taskData.Task.ID,
+            Success=True,
+        )
+        
+        if taskData.args.get_arg("backups_path"):
+            response.DisplayParams = f"Listing edited and unsaved files in VSCode from backup directory: {taskData.args.get_arg('backups_path')}"
         else:
-            task.display_params = "Listing edited and unsaved files in VSCode from backup directory: '~/Library/Application Support/Code/Backups'"
-        return task
+            response.DisplayParams = "Listing edited and unsaved files in VSCode from default backup directory: '~/Library/Application Support/Code/Backups'"
+
+        return response
 
     async def process_response(self, task: PTTaskMessageAllData, response: any) -> PTTaskProcessResponseMessageResponse:
         resp = PTTaskProcessResponseMessageResponse(TaskID=task.Task.ID, Success=True)

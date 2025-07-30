@@ -44,12 +44,18 @@ class VscodeListRecentCommand(CommandBase):
         ],
     )
 
-    async def create_tasking(self, task: MythicTask) -> MythicTask:
-        if task.args.get_arg("db"):
-            task.display_params = "Listing recent VSCode files from state database at " + task.args.get_arg("db")
+    async def create_go_tasking(self, taskData: PTTaskMessageAllData) -> PTTaskCreateTaskingMessageResponse:
+        response = PTTaskCreateTaskingMessageResponse(
+            TaskID=taskData.Task.ID,
+            Success=True,
+        )
+        
+        if taskData.args.get_arg("db"):
+            response.DisplayParams = f"Listing recent VSCode files from state database at {taskData.args.get_arg('db')}"
         else:
-            task.display_params = "Listing recent VSCode files from state database at '~/Library/Application Support/Code/User/globalStorage/state.vscdb'"
-        return task
+            response.DisplayParams = "Listing recent VSCode files from default state database at '~/Library/Application Support/Code/User/globalStorage/state.vscdb'"
+
+        return response
 
     async def process_response(self, task: PTTaskMessageAllData, response: any) -> PTTaskProcessResponseMessageResponse:
         resp = PTTaskProcessResponseMessageResponse(TaskID=task.Task.ID, Success=True)

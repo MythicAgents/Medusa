@@ -47,27 +47,38 @@ class SpawnJxaCommand(CommandBase):
         supported_python_versions=["Python 2.7", "Python 3.8"],
         supported_os=[SupportedOS.MacOS ],
     )
+    
+    async def create_go_tasking(self, taskData: MythicCommandBase.PTTaskMessageAllData) -> MythicCommandBase.PTTaskCreateTaskingMessageResponse:
+        response = MythicCommandBase.PTTaskCreateTaskingMessageResponse(
+            TaskID=taskData.Task.ID,
+            Success=True,
+        )
 
-    async def create_tasking(self, task: MythicTask) -> MythicTask:
-        file_resp = await MythicRPC().execute(
-                "get_file", 
-                task_id=task.id,
-                file_id=task.args.get_arg("file"),
-                get_contents=False
-            )
-        if file_resp.status == MythicStatus.Success:
-            original_file_name = file_resp.response[0]["filename"]
-            task.display_params = f"Spawning osascript and loading script: {original_file_name}"
-        else:
-            raise Exception("Failed to register file: " + file_resp.error)
+        try:
+            file_resp = await SendMythicRPCFileSearch(MythicRPCFileSearchMessage(
+                TaskID=taskData.Task.ID,
+                AgentFileID=taskData.args.get_arg("file"),
+            ))
+
+            if file_resp.Success:
+                if len(file_resp.Files) > 0:
+                    response.DisplayParams = f"Spawning osascript and loading script: {file_resp.Files[0].Filename}"
+                elif len(file_resp.response) == 0:
+                    raise Exception("Failed to find the named file. Have you uploaded it before? Did it get deleted?")
+            else:
+                raise Exception("Error from Mythic RPC: " + str(file_resp.error))
         
-        file_resp = await MythicRPC().execute("update_file",
-                file_id=task.args.get_arg("file"),
-                delete_after_fetch=True,
-                comment="Uploaded and piped to new osascript process")
+            file_resp = await SendMythicRPCFileUpdate(MythicRPCFileUpdateMessage(
+                AgentFileID=taskData.args.get_arg("file"),
+                DeleteAfterFetch=True,
+                Comment="Uploaded for spawn_jxa"
+            ))
         
+        except Exception as e:
+            raise Exception("Error from Mythic: " + str(sys.exc_info()[-1].tb_lineno) + str(e))
         
-        return task
+        return response
+        
 
     async def process_response(self, task: PTTaskMessageAllData, response: any) -> PTTaskProcessResponseMessageResponse:
         resp = PTTaskProcessResponseMessageResponse(TaskID=task.Task.ID, Success=True)

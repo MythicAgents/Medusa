@@ -11,7 +11,6 @@ class CdArguments(TaskArguments):
             CommandParameter(
                 name="path",
                 type=ParameterType.String,
-                default_value=".",
                 description="Path of file or folder on the current system to cd to",
             )
         ]
@@ -40,9 +39,15 @@ class CdCommand(CommandBase):
         supported_os=[SupportedOS.MacOS, SupportedOS.Windows, SupportedOS.Linux ],
     )
 
-    async def create_tasking(self, task: MythicTask) -> MythicTask:
-        task.display_params = task.args.get_arg("path")
-        return task
+    async def create_go_tasking(self, taskData: MythicCommandBase.PTTaskMessageAllData) -> MythicCommandBase.PTTaskCreateTaskingMessageResponse:
+        response = MythicCommandBase.PTTaskCreateTaskingMessageResponse(
+            TaskID=taskData.Task.ID,
+            Success=True,
+        )
+
+        response.DisplayParams = taskData.args.get_arg("path")
+
+        return response
 
     async def process_response(self, task: PTTaskMessageAllData, response: any) -> PTTaskProcessResponseMessageResponse:
         resp = PTTaskProcessResponseMessageResponse(TaskID=task.Task.ID, Success=True)

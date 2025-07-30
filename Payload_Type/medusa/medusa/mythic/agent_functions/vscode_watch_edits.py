@@ -54,13 +54,19 @@ class VscodeWatchEditsCommand(CommandBase):
         supported_python_versions=["Python 2.7", "Python 3.8"],
         supported_os=[SupportedOS.MacOS],
     )
-
-    async def create_tasking(self, task: MythicTask) -> MythicTask:
-        if task.args.get_arg("backups_path"):
-            task.display_params = "Watching for VSCode edits. Polling '{}' for changes every {} seconds".format(task.args.get_arg("backups_path"), str(task.args.get_arg("seconds")))
+    
+    async def create_go_tasking(self, taskData: PTTaskMessageAllData) -> PTTaskCreateTaskingMessageResponse:
+        response = PTTaskCreateTaskingMessageResponse(
+            TaskID=taskData.Task.ID,
+            Success=True,
+        )
+        
+        if taskData.args.get_arg("backups_path"):
+            response.DisplayParams = f"Watching for VSCode edits. Polling '{taskData.args.get_arg('backups_path')}' for changes every {taskData.args.get_arg('seconds')} seconds"
         else:
-            task.display_params = "Watching for VSCode edits. Polling '{}' for changes every {} seconds".format("~/Library/Application Support/Code/Backups", str(task.args.get_arg("seconds")))
-        return task
+            response.DisplayParams = "Watching for VSCode edits. Polling '~/Library/Application Support/Code/Backups' for changes every {} seconds".format(taskData.args.get_arg("seconds"))
+
+        return response
 
     async def process_response(self, task: PTTaskMessageAllData, response: any) -> PTTaskProcessResponseMessageResponse:
         resp = PTTaskProcessResponseMessageResponse(TaskID=task.Task.ID, Success=True)
