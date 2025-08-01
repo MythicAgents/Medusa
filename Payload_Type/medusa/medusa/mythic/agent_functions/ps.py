@@ -26,12 +26,22 @@ class PsCommand(CommandBase):
     browser_script = BrowserScript(script_name="ps", author="@ajpc500", for_new_ui=True)
     attributes = CommandAttributes(
         supported_python_versions=[ "Python 2.7", "Python 3.8" ],
-        supported_os=[ SupportedOS.Windows, SupportedOS.Linux ],
+        supported_os=[ SupportedOS.Windows, SupportedOS.Linux, SupportedOS.MacOS ],
     )
 
     async def create_tasking(self, task: MythicTask) -> MythicTask:
         task.display_params = "Getting limited process listing"
         return task
+    
+    async def create_go_tasking(self, taskData: MythicCommandBase.PTTaskMessageAllData) -> MythicCommandBase.PTTaskCreateTaskingMessageResponse:
+        response = MythicCommandBase.PTTaskCreateTaskingMessageResponse(
+            TaskID=taskData.Task.ID,
+            Success=True,
+        )
+
+        response.DisplayParams = "Getting process listing"
+
+        return response
 
     async def process_response(self, task: PTTaskMessageAllData, response: any) -> PTTaskProcessResponseMessageResponse:
         resp = PTTaskProcessResponseMessageResponse(TaskID=task.Task.ID, Success=True)

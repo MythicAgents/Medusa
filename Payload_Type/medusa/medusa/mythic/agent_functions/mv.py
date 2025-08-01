@@ -55,6 +55,18 @@ class MvCommand(CommandBase):
         task.display_params = "Moving " + str(task.args.get_arg("source")) + " to "
         task.display_params += str(task.args.get_arg("destination"))
         return task
+    
+    async def create_go_tasking(self, taskData: MythicCommandBase.PTTaskMessageAllData) -> MythicCommandBase.PTTaskCreateTaskingMessageResponse:
+        response = MythicCommandBase.PTTaskCreateTaskingMessageResponse(
+            TaskID=taskData.Task.ID,
+            Success=True,
+        )
+        
+        response.DisplayParams = f"Moving {taskData.args.get_arg('source')} to {taskData.args.get_arg('destination')}"
+
+        return response
+
+
 
     async def process_response(self, task: PTTaskMessageAllData, response: any) -> PTTaskProcessResponseMessageResponse:
         resp = PTTaskProcessResponseMessageResponse(TaskID=task.Task.ID, Success=True)

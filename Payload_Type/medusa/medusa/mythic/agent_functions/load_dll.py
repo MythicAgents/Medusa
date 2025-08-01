@@ -51,10 +51,16 @@ class LoadDllCommand(CommandBase):
         supported_os=[SupportedOS.Windows],
     )
 
-    async def create_tasking(self, task: MythicTask) -> MythicTask:
-        task.display_params = "Executing " + str(task.args.get_arg("dllpath")) + " with export '"
-        task.display_params += str(task.args.get_arg("dllexport")) + "'"
-        return task
+    async def create_go_tasking(self, taskData: PTTaskMessageAllData) -> PTTaskCreateTaskingMessageResponse:
+        response = PTTaskCreateTaskingMessageResponse(
+            TaskID=taskData.Task.ID,
+            Success=True,
+        )
+        
+        response.DisplayParams = "Executing " + str(taskData.args.get_arg("dllpath")) + " with export '"
+        response.DisplayParams += str(taskData.args.get_arg("dllexport")) + "'"
+
+        return response
 
     async def process_response(self, task: PTTaskMessageAllData, response: any) -> PTTaskProcessResponseMessageResponse:
         resp = PTTaskProcessResponseMessageResponse(TaskID=task.Task.ID, Success=True)
