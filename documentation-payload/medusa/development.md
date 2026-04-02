@@ -7,9 +7,9 @@ pre = "<b>3. </b>"
 
 ## Adding Commands
 
-Commands are located in `Payload_Types/medusa/agent_code/`. Notably, there are three file extensions you might encounter. A given command can be included solely as a `.py`, if it could be used in a Python 2.7 or 3.8 script with no modification. Where changes are required, be that due to syntax, libraries, etc. a `.py2` and/or `.py3` file is used. These are looked up at payload build-time to ensure the correct function code is included.
+Commands are located in `Payload_Type/medusa/medusa/agent_code/`. Notably, there are three file extensions you might encounter. A given command can be included solely as a `.py`, if it could be used in a Python 2.7 or 3.8 script with no modification. Where changes are required, be that due to syntax, libraries, etc. a `.py2` and/or `.py3` file is used. These are looked up at payload build-time to ensure the correct function code is included.
 
-In addition to the `.py*` files above, the function definitions found in `Payload_Types/medusa/mythic/agent_functions/` include an attribute that specifies which versions of Python a given function is compatible with (as well as which OSs). Using the `download` function as an example:
+In addition to the `.py*` files above, the function definitions found in `Payload_Type/medusa/medusa/mythic/agent_functions/` include an attribute that specifies which versions of Python a given function is compatible with (as well as which OSs). Using the `download` function as an example:
 
 ```Python
 class DownloadCommand(CommandBase):
@@ -76,12 +76,34 @@ This function can be executed within a function as below:
 
 ## Modifying base agent behavior
 
-The base agent templates can be found at `Payload_Types/medusa/agent_code/base_agent/`. Just as with functions, there are `.py2` and `.py3` files included for the two supported Python versions.
+The base agent templates can be found at `Payload_Type/medusa/medusa/agent_code/base_agent/`. Just as with functions, there are `.py2` and `.py3` files included for the two supported Python versions.
 
 Medusa supports use of either the non-default `cryptography` library (installed on macOS, but not ubiquitous elsewhere) or a manual crypto implementation using built-in libraries for its encrypted communications. For this reason, within the `base_agent/` directory, you'll see a pair of `crypto_lib` python files and a pair of `manual_crypto` files. As you can probably guess, this allows an agent to pick encryption method across either supported Python version.
 
-If you choose to modify the base agent, be sure to duplicate your changes across both `.py2` and `.py3` files to maintain compatibility (if your changes are indeed supported across both versions).
+The agent construction now uses a **core + transport** model:
+
+- `base_agent_core.py2` / `base_agent_core.py3` contain shared runtime logic (task loop, task processing, response handling, sleep/killdate, etc.).
+- `transport_http.py2` / `transport_http.py3` contain HTTP-specific networking and config snippets.
+- `transport_azure_blob.py2` / `transport_azure_blob.py3` contain Azure Blob-specific networking and config snippets.
+
+During build, the payload builder stitches these together by replacing section markers in the core template (`TRANSPORT_IMPORTS`, `TRANSPORT_CLASS_FIELDS`, `TRANSPORT_FUNCTIONS`, `TRANSPORT_CONFIG`) with content from the selected transport template.
+
+If you modify shared behavior, update `base_agent_core.py2` and `base_agent_core.py3`. If you modify transport behavior, update the corresponding `transport_*.py2` and `transport_*.py3` files.
 
 ## Adding C2 Profiles
 
-Medusa currently only supported the HTTP C2 profile and will need some refactoring to easily support others. Watch this space though!
+Medusa currently supports both `http` and `azure_blob` C2 profiles.
+
+For new transports, add a matching pair of template files:
+
+- `transport_<name>.py2`
+- `transport_<name>.py3`
+
+with the required sections:
+
+- `### IMPORTS ###`
+- `### CLASS_FIELDS ###`
+- `### FUNCTIONS ###`
+- `### CONFIG ###`
+
+Then add the profile name to the payload builder's supported `c2_profiles` list.

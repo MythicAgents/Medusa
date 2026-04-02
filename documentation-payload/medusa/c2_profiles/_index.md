@@ -8,3 +8,8 @@ pre = "<b>4. </b>"
 # Supported C2 Profiles
 
 This section goes into any `medusa` specifics for the supported C2 profiles.
+
+Current supported profiles:
+
+- HTTP
+- Azure Blob

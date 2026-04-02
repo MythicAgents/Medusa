@@ -15,6 +15,14 @@ From the Mythic install root, run the command:
 
 Once installed, restart Mythic to build a new agent.
 
+## RabbitMQ Config Notes
+
+The file [Payload_Type/medusa/rabbitmq_config.json](Payload_Type/medusa/rabbitmq_config.json) is a template and must match your Mythic environment.
+
+- Set `rabbitmq_password` to your Mythic `RABBITMQ_PASSWORD` value (typically from Mythic `.env`).
+- Set `rabbitmq_host` to your RabbitMQ host/container name (often `mythic_rabbitmq` in docker-compose setups, or `127.0.0.1` for local binds).
+- Set `mythic_server_host` to your Mythic server host/container name (often `mythic_server` in docker-compose setups, or `127.0.0.1` for local binds).
+
 ## Notable Features
 - Dynamic loading/unloading of agent functions to limit exposure of agent capabilities on-disk.
 - Loading of Python modules in-memory for use in custom scripts.
@@ -51,7 +59,7 @@ mv | `mv src_file_or_dir dst_file_or_dir` | Move file or folder to destination.
 pip_freeze | `pip_freeze` | Programmatically list installed packages on system.
 rm | `rm file_or_dir` | Delete file or folder.
 shell | `shell [command]` | Run a shell command which will spawn using subprocess.Popen(). Note that this will wait for command to complete so be careful not to block your agent.
-socks | `socks start/stop [port]` | Start/stop SOCKS5 proxy through Medusa agent. 
+socks | `socks start/stop [port]` | Start/stop SOCKS5 proxy through Medusa agent.
 sleep | `sleep [seconds] [jitter percentage]` | Set the callback interval of the agent in seconds.
 unload | `unload command` | Unload an existing capability from an agent.
 unload_module | `unload_module module_name` | Unload a Python module previously loaded into memory.
@@ -59,7 +67,7 @@ upload | `upload` | Upload a file to a remote path on the machine.
 watch_dir | `watch_dir path seconds` | Watch for changes in target directory, polling for changes at a specified rate.
 
 
-### macOS Commands 
+### macOS Commands
 
 Command | Syntax | Description
 ------- | ------ | -----------
@@ -90,7 +98,7 @@ Both versions of the Medusa agent use an AES256 HMAC implementation written with
 
 ### Py2 vs Py3 Commands
 
-Within the `Payload_Type/Medusa/agent_code` directory, you will see `base_agent` files with both `py2` and `py3` suffixes. Likewise, similar file extensions can be seen for individual function files too. 
+Within the `Payload_Type/Medusa/agent_code` directory, you will see `base_agent` files with both `py2` and `py3` suffixes. Likewise, similar file extensions can be seen for individual function files too.
 
 These are read by the `builder.py` script to firstly select the right base Python version of the Medusa agent. `builder.py` will then include commands that are specific to the chosen python version. In the case where a command only has a `.py` extension, this will be used by default, with the assumption being that no alternative code is needed between the Py2 and Py3 versions.
 
@@ -111,7 +119,7 @@ def dummyFunction(self, task_id):
   while(True):
       # Check if we've got a stop signal.
       if [task for task in self.taskings if task["task_id"] == task_id][0]["stopped"]: return "Job stopped."
-      
+
       # Send output back to Mythic
       self.sendTaskOutputUpdate(task_id, "We're still running")
 
@@ -120,7 +128,7 @@ def dummyFunction(self, task_id):
 
 ## Supported C2 Profiles
 
-Currently, only one C2 profile is available to use when creating a new Medusa agent: http (both with and without AES256 HMAC encryption).
+Medusa currently supports two C2 profiles: `http` (both with and without AES256 HMAC encryption) and `azure_blob`.
 
 ### HTTP Profile
 
