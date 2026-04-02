@@ -4,5 +4,8 @@
     "virtual_host": "mythic_vhost",
     "host": "127.0.0.1",
     "name": "hostname",
+    "rabbitmq_password": "TIRncpiNFo7De0reSX8rMzbvqtPINt",
+    "rabbitmq_host": "127.0.0.1",
+    "mythic_server_host": "127.0.0.1",
     "container_files_path": "/Mythic/"
 }

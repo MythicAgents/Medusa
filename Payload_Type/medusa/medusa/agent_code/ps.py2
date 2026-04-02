@@ -63,7 +63,7 @@
                 if uid in user_map:
                     username = user_map[uid]
 
-                process = {"process_id": pid, "parent_process_id": ppid, "user_id": username, "name": name,
+                process = {"process_id": int(pid), "parent_process_id": int(ppid), "user_id": username, "name": name,
                            "bin_path": cmdline}
 
                 processes.append(process)
