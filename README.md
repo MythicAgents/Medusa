@@ -45,6 +45,7 @@ cd | `cd [.. dir]` | Change working directory (`..` to go up one directory).
 cp | `cp src_file_or_dir dst_file_or_dir` | Copy file or folder to destination.
 cwd | `cwd` | Print working directory.
 download | `download [path]` | Download a file from the target system.
+download_bulk | `download_bulk [path1] [path2] ...` | Download multiple files from the target system in one task.
 exit | `exit` | Exit a callback.
 env | `env` | Print environment variables.
 eval_code | `eval_code [commands]` | Execute python code and return output.
