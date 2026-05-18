@@ -1,0 +1,60 @@
+name: Payload Build Matrix
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - dev
+
+permissions:
+  contents: read
+
+concurrency:
+  group: payload-build-matrix-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  discover-combos:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.discover.outputs.matrix }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Discover supported build combinations
+        id: discover
+        run: |
+          python .github/scripts/matrix-test-builder.py
+
+  build-matrix:
+    needs: discover-combos
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.discover-combos.outputs.matrix) }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run payload build tests for combo
+        env:
+          TEST_PROFILE: ${{ matrix.profile }}
+          TEST_PYTHON_VERSION: ${{ matrix.python_version }}
+          TEST_CRYPTO_IMPL: ${{ matrix.crypto_impl }}
+        run: |
+          python -m unittest tests/test_payload_build_matrix.py -v
