@@ -1,10 +1,10 @@
-import pathlib
+import os
 import sys
 import unittest
 
 
-ROOT = pathlib.Path(__file__).resolve().parents[1]
-AGENT_CODE_PATH = ROOT / "Payload_Type" / "medusa" / "medusa" / "agent_code"
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+AGENT_CODE_PATH = os.path.join(ROOT, "Payload_Type", "medusa", "medusa", "agent_code")
 
 # Each agent_code command file is a class-method fragment (an indented `def`
 # meant to be spliced into the agent class at build time), so wrapping it in a
@@ -23,21 +23,29 @@ else:
 
 def discover_command_fragments(suffixes):
     fragments = []
-    for path in sorted(AGENT_CODE_PATH.glob("*")):
-        if path.is_file() and path.name.rsplit(".", 1)[-1] in suffixes:
+    for name in sorted(os.listdir(AGENT_CODE_PATH)):
+        path = os.path.join(AGENT_CODE_PATH, name)
+        if os.path.isfile(path) and name.rsplit(".", 1)[-1] in suffixes:
             fragments.append(path)
     return fragments
 
 
-def _make_compile_test(fragment):
-    def test(self):
-        wrapped = CLASS_WRAPPER + fragment.read_text()
-        try:
-            compile(wrapped, fragment.name, "exec")
-        except SyntaxError as e:
-            self.fail("Syntax error in {}: {}".format(fragment.name, e))
+def _read_file(path):
+    with open(path, "r") as f:
+        return f.read()
 
-    test.__doc__ = "syntax check: {}".format(fragment.name)
+
+def _make_compile_test(fragment):
+    fragment_name = os.path.basename(fragment)
+
+    def test(self):
+        wrapped = CLASS_WRAPPER + _read_file(fragment)
+        try:
+            compile(wrapped, fragment_name, "exec")
+        except SyntaxError as e:
+            self.fail("Syntax error in {}: {}".format(fragment_name, e))
+
+    test.__doc__ = "syntax check: {}".format(fragment_name)
     return test
 
 
@@ -51,7 +59,7 @@ def _attach_fragment_tests():
     # Generate one test method per fragment so each file shows up as its own
     # result line in verbose/debug output (e.g. test_cat_py, test_ls_py3).
     for fragment in discover_command_fragments(FRAGMENT_SUFFIXES):
-        name = "test_" + fragment.name.replace(".", "_")
+        name = "test_" + os.path.basename(fragment).replace(".", "_")
         setattr(TestAgentCodeSyntax, name, _make_compile_test(fragment))
 
 
