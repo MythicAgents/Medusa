@@ -28,13 +28,24 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup Python ${{ matrix.python-version }}
+        if: matrix.python-version != '2.7'
         uses: actions/setup-python@v5
         with:
           python-version: "${{ matrix.python-version }}"
 
+      - name: Install Python 2.7
+        if: matrix.python-version == '2.7'
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y python2
+
       - name: Run agent_code syntax smoke tests
         run: |
-          python tests/test_agent_code_syntax.py -v
+          if [ "${{ matrix.python-version }}" = "2.7" ]; then
+            python2 tests/test_agent_code_syntax.py -v
+          else
+            python tests/test_agent_code_syntax.py -v
+          fi
 
   discover-combos:
     runs-on: ubuntu-latest
