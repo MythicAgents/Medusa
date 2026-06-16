@@ -219,7 +219,6 @@
                     time.sleep(0.01)
 
         def _read_pty():
-            buf = b""
             while not done:
                 try:
                     r, _, _ = select.select([master_fd], [], [], 0.5)
@@ -227,15 +226,9 @@
                         chunk = os.read(master_fd, 4096)
                         if not chunk:
                             break
-                        buf += chunk
-                    else:
-                        if buf:
-                            _send_interactive(buf, MSG_OUTPUT)
-                            buf = b""
+                        _send_interactive(chunk, MSG_OUTPUT)
                 except OSError:
                     break
-            if buf:
-                _send_interactive(buf, MSG_OUTPUT)
 
         def _write_pty():
             nonlocal done

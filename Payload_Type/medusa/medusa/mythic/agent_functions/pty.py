@@ -60,7 +60,7 @@ class PtyCommand(CommandBase):
     help_cmd = "pty [/bin/bash]\npty self\npty fork"
     description = "Open an interactive PTY session. Modes: 'spawn' (default) runs a program with a PTY, 'self' opens an in-process Python REPL with live agent state, 'fork' forks the agent and opens a Python REPL with snapshotted state and full PTY support."
     version = 2
-    author = ""
+    author = "@ajpc500"
     attackmapping = ["T1059"]
     argument_class = PtyArguments
     supported_ui_features = ["task_response:interactive"]
