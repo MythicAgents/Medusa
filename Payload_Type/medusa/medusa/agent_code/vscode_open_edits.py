@@ -26,7 +26,7 @@
                         else:
                             open_edit["backup"] = path
                             open_edit["original"] = file_content[0].split("{")[0].replace("file://","").rstrip()
-                            open_edit["size"] = f"{json_data['size']} B"
+                            open_edit["size"] = "{} B".format(json_data['size'])
                             open_edit["mtime"] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(json_data["mtime"]/1000))
                             open_edit["ctime"] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(json_data["ctime"]/1000))
                             open_edit["type"] = "Edit"
