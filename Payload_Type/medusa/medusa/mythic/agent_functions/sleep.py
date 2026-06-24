@@ -66,6 +66,22 @@ class SleepCommand(CommandBase):
         if int(task.args.get_arg("jitter")) != -1:
             task.display_params += " with " + str(task.args.get_arg("jitter")) + "% jitter"
         return task
+    
+    async def create_go_tasking(self, taskData: MythicCommandBase.PTTaskMessageAllData) -> MythicCommandBase.PTTaskCreateTaskingMessageResponse:
+        response = MythicCommandBase.PTTaskCreateTaskingMessageResponse(
+            TaskID=taskData.Task.ID,
+            Success=True,
+        )
+        
+        seconds = taskData.args.get_arg("seconds")
+        jitter = taskData.args.get_arg("jitter")
+
+        if jitter == -1:
+            response.DisplayParams = f"Setting sleep to {seconds} seconds"
+        else:
+            response.DisplayParams = f"Setting sleep to {seconds} seconds with {jitter}% jitter"
+
+        return response
 
     async def process_response(self, task: PTTaskMessageAllData, response: any) -> PTTaskProcessResponseMessageResponse:
         resp = PTTaskProcessResponseMessageResponse(TaskID=task.Task.ID, Success=True)

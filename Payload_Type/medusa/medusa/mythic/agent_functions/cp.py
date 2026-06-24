@@ -51,10 +51,15 @@ class CpCommand(CommandBase):
         supported_os=[SupportedOS.MacOS, SupportedOS.Windows, SupportedOS.Linux ],
     )
 
-    async def create_tasking(self, task: MythicTask) -> MythicTask:
-        task.display_params = "Copying " + str(task.args.get_arg("source")) + " to "
-        task.display_params += str(task.args.get_arg("destination"))
-        return task
+    async def create_go_tasking(self, taskData: MythicCommandBase.PTTaskMessageAllData) -> MythicCommandBase.PTTaskCreateTaskingMessageResponse:
+        response = MythicCommandBase.PTTaskCreateTaskingMessageResponse(
+            TaskID=taskData.Task.ID,
+            Success=True,
+        )
+
+        response.DisplayParams = f"{taskData.args.get_arg('source')} to {taskData.args.get_arg('destination')}"
+
+        return response
 
     async def process_response(self, task: PTTaskMessageAllData, response: any) -> PTTaskProcessResponseMessageResponse:
         resp = PTTaskProcessResponseMessageResponse(TaskID=task.Task.ID, Success=True)

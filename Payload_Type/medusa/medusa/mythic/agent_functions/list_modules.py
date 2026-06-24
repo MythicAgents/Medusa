@@ -43,9 +43,18 @@ class ListModulesCommand(CommandBase):
         supported_os=[ SupportedOS.MacOS, SupportedOS.Windows, SupportedOS.Linux ],
     )
 
-    async def create_tasking(self, task: MythicTask) -> MythicTask:
-        task.display_params = f"Listing modules loaded in-memory"
-        return task
+    async def create_go_tasking(self, taskData: PTTaskMessageAllData) -> PTTaskCreateTaskingMessageResponse:
+        response = PTTaskCreateTaskingMessageResponse(
+            TaskID=taskData.Task.ID,
+            Success=True,
+        )
+        
+        if taskData.args.get_arg("module_name"):
+            response.DisplayParams = f"Listing files for module: {taskData.Task.Args.get_arg('module_name')}"
+        else:
+            response.DisplayParams = "Listing modules loaded in-memory"
+
+        return response
 
     async def process_response(self, task: PTTaskMessageAllData, response: any) -> PTTaskProcessResponseMessageResponse:
         resp = PTTaskProcessResponseMessageResponse(TaskID=task.Task.ID, Success=True)

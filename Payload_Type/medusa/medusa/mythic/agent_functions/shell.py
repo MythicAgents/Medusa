@@ -35,9 +35,21 @@ class ShellCommand(CommandBase):
         supported_os=[ SupportedOS.MacOS, SupportedOS.Linux, SupportedOS.Windows ]
     )
 
-    async def create_tasking(self, task: MythicTask) -> MythicTask:
-        task.display_params = task.args.get_arg("command")
-        return task
+    async def create_go_tasking(self, taskData: MythicCommandBase.PTTaskMessageAllData) -> MythicCommandBase.PTTaskCreateTaskingMessageResponse:
+        response = MythicCommandBase.PTTaskCreateTaskingMessageResponse(
+            TaskID=taskData.Task.ID,
+            Success=True,
+        )
+
+        await SendMythicRPCArtifactCreate(MythicRPCArtifactCreateMessage(
+                TaskID=taskData.Task.ID, ArtifactMessage="{}".format(taskData.args.get_arg("command")),
+                BaseArtifactType="Process Create"
+            ))
+        
+        response.DisplayParams = f"Executing shell command: {taskData.args.get_arg('command')}"
+
+        return response
+
 
     async def process_response(self, task: PTTaskMessageAllData, response: any) -> PTTaskProcessResponseMessageResponse:
         resp = PTTaskProcessResponseMessageResponse(TaskID=task.Task.ID, Success=True)

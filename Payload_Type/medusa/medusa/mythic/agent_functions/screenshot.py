@@ -25,19 +25,23 @@ class ScreenshotCommand(CommandBase):
     argument_class = ScreenshotArguments
     browser_script = BrowserScript(script_name="screenshot", author="@its_a_feature_", for_new_ui=True)
     attributes = CommandAttributes(
-        filter_by_build_parameter={
-            "python_version": "Python 2.7"
-        },
-        supported_python_versions=["Python 2.7"],
+        supported_python_versions=["Python 2.7", "Python 3.8"],
         supported_os=[ SupportedOS.MacOS ]
     )
-
-    async def create_tasking(self, task: MythicTask) -> MythicTask:
-        resp = await MythicRPC().execute("create_artifact", task_id=task.id,
-            artifact="CG.CGWindowListCreateImage(region, CG.kCGWindowListOptionOnScreenOnly, CG.kCGNullWindowID, CG.kCGWindowImageDefault)",
-            artifact_type="API Called",
+    
+    async def create_go_tasking(self, taskData: MythicCommandBase.PTTaskMessageAllData) -> MythicCommandBase.PTTaskCreateTaskingMessageResponse:
+        response = MythicCommandBase.PTTaskCreateTaskingMessageResponse(
+            TaskID=taskData.Task.ID,
+            Success=True,
         )
-        return task
+
+        await SendMythicRPCArtifactCreate(MythicRPCArtifactCreateMessage(
+                    TaskID=taskData.Task.ID,
+                    ArtifactMessage="CG.CGWindowListCreateImage(region, CG.kCGWindowListOptionOnScreenOnly, CG.kCGNullWindowID, CG.kCGWindowImageDefault)",
+                    BaseArtifactType="API Called"
+                ))
+
+        return response
 
     async def process_response(self, task: PTTaskMessageAllData, response: any) -> PTTaskProcessResponseMessageResponse:
         resp = PTTaskProcessResponseMessageResponse(TaskID=task.Task.ID, Success=True)

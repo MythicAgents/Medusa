@@ -51,14 +51,21 @@ class ListDllsCommand(CommandBase):
         supported_python_versions=["Python 3.8"],
         supported_os=[ SupportedOS.Windows ],
     )
+    
+    async def create_go_tasking(self, taskData: PTTaskMessageAllData) -> PTTaskCreateTaskingMessageResponse:
+        response = PTTaskCreateTaskingMessageResponse(
+            TaskID=taskData.Task.ID,
+            Success=True,
+        )
+        
+        process_id = taskData.Task.Args.get_arg("process_id")
 
-    async def create_tasking(self, task: MythicTask) -> MythicTask:
-        process_id = task.args.get_arg("process_id")
         if process_id == 0:
-            task.display_params = f"Listing DLLs loaded in current process"
+            response.DisplayParams = "Listing DLLs loaded in current process"
         else:
-            task.display_params = f"Listing DLLs loaded in process with PID: {process_id}"
-        return task
+            response.DisplayParams = f"Listing DLLs loaded in process with PID: {process_id}"
+
+        return response
 
     async def process_response(self, task: PTTaskMessageAllData, response: any) -> PTTaskProcessResponseMessageResponse:
         resp = PTTaskProcessResponseMessageResponse(TaskID=task.Task.ID, Success=True)
