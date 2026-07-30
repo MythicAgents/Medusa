@@ -324,7 +324,7 @@ class Medusa(PayloadType):
 
             if self.get_parameter("obfuscate_script") == "Yes":
                 key = hashlib.md5(os.urandom(128)).hexdigest().encode()
-                encrypted_content = ''.join(chr(c^k) for c,k in zip(base_code.encode(), cycle(key))).encode()
+                encrypted_content = bytes(c ^ k for c, k in zip(base_code.encode(), cycle(key)))
                 b64_enc_content = base64.b64encode(encrypted_content)
                 xor_func = "chr(c^k)" if self.get_parameter("python_version") == "Python 3.8" else "chr(ord(c)^ord(k))"
                 base_code = """import base64, itertools
