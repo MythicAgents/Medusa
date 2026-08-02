@@ -30,9 +30,16 @@ class PipFreezeCommand(CommandBase):
         supported_python_versions=["Python 2.7", "Python 3.8"],
         supported_os=[ SupportedOS.MacOS, SupportedOS.Windows, SupportedOS.Linux ],
     )
-
-    async def create_tasking(self, task: MythicTask) -> MythicTask:
-        return task
+    
+    async def create_go_tasking(self, taskData: MythicCommandBase.PTTaskMessageAllData) -> MythicCommandBase.PTTaskCreateTaskingMessageResponse:
+        response = MythicCommandBase.PTTaskCreateTaskingMessageResponse(
+            TaskID=taskData.Task.ID,
+            Success=True,
+        )
+        
+        response.DisplayParams = "Listing installed Python modules"
+        
+        return response
 
     async def process_response(self, task: PTTaskMessageAllData, response: any) -> PTTaskProcessResponseMessageResponse:
         resp = PTTaskProcessResponseMessageResponse(TaskID=task.Task.ID, Success=True)

@@ -37,10 +37,16 @@ class JobKillCommand(CommandBase):
         supported_python_versions=["Python 2.7", "Python 3.8"],
         supported_os=[SupportedOS.MacOS, SupportedOS.Windows, SupportedOS.Linux ],
     )
+    
+    async def create_go_tasking(self, taskData: MythicCommandBase.PTTaskMessageAllData) -> MythicCommandBase.PTTaskCreateTaskingMessageResponse:
+        response = MythicCommandBase.PTTaskCreateTaskingMessageResponse(
+            TaskID=taskData.Task.ID,
+            Success=True,
+        )
 
-    async def create_tasking(self, task: MythicTask) -> MythicTask:
-        task.display_params = "Sending stop signal for task with id: " + task.args.get_arg("target_task_id")
-        return task
+        response.DisplayParams = "Sending stop signal for task with id: " + taskData.Task.Args.get_arg("target_task_id")
+
+        return response
 
     async def process_response(self, task: PTTaskMessageAllData, response: any) -> PTTaskProcessResponseMessageResponse:
         resp = PTTaskProcessResponseMessageResponse(TaskID=task.Task.ID, Success=True)

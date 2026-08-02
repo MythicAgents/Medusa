@@ -26,7 +26,7 @@ class LsArguments(TaskArguments):
                     self.add_arg("path", temp_json["path"] + "/" + temp_json["file"])
                     self.add_arg("file_browser", True, type=ParameterType.Boolean)
                 else:
-                    self.add_arg("path", temp_json["path"])
+                    self.add_arg("path", temp_json.get("path", "."))
             else:
                 self.add_arg("path", self.command_line)
         else:
@@ -49,13 +49,19 @@ class LsCommand(CommandBase):
         supported_os=[SupportedOS.MacOS, SupportedOS.Windows, SupportedOS.Linux ],
     )
 
-    async def create_tasking(self, task: MythicTask) -> MythicTask:
-        if task.args.has_arg("file_browser") and task.args.get_arg("file_browser"):
-            host = task.callback.host
-            task.display_params = host + ":" + task.args.get_arg("path")
+    async def create_go_tasking(self, taskData: MythicCommandBase.PTTaskMessageAllData) -> MythicCommandBase.PTTaskCreateTaskingMessageResponse:
+        response = MythicCommandBase.PTTaskCreateTaskingMessageResponse(
+            TaskID=taskData.Task.ID,
+            Success=True,
+        )
+
+        if taskData.args.has_arg("file_browser") and taskData.args.get_arg("file_browser"):
+            host = taskData.Callback.Host
+            response.DisplayParams = host + ":" + taskData.args.get_arg("path")
         else:
-            task.display_params = task.args.get_arg("path")
-        return task
+            response.DisplayParams = taskData.args.get_arg("path")
+
+        return response
 
     async def process_response(self, task: PTTaskMessageAllData, response: any) -> PTTaskProcessResponseMessageResponse:
         resp = PTTaskProcessResponseMessageResponse(TaskID=task.Task.ID, Success=True)

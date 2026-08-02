@@ -33,13 +33,20 @@ class ListAppsCommand(CommandBase):
         supported_python_versions=["Python 2.7"],
         supported_os=[SupportedOS.MacOS],
     )
-
-    async def create_tasking(self, task: MythicTask) -> MythicTask:
-        resp = await MythicRPC().execute("create_artifact", task_id=task.id,
-            artifact="NSWorkspace.sharedWorkspace().runningApplications()",
-            artifact_type="API Called",
+    
+    async def create_go_tasking(self, taskData: MythicCommandBase.PTTaskMessageAllData) -> MythicCommandBase.PTTaskCreateTaskingMessageResponse:
+        response = MythicCommandBase.PTTaskCreateTaskingMessageResponse(
+            TaskID=taskData.Task.ID,
+            Success=True,
         )
-        return task
+
+        await SendMythicRPCArtifactCreate(MythicRPCArtifactCreateMessage(
+                    TaskID=taskData.Task.ID,
+                    ArtifactMessage=f"NSWorkspace.sharedWorkspace().runningApplications()",
+                    BaseArtifactType="API Called"
+                ))
+
+        return response
 
     async def process_response(self, task: PTTaskMessageAllData, response: any) -> PTTaskProcessResponseMessageResponse:
         resp = PTTaskProcessResponseMessageResponse(TaskID=task.Task.ID, Success=True)

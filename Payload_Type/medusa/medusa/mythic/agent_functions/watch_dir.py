@@ -54,10 +54,16 @@ class WatchDirCommand(CommandBase):
         supported_python_versions=["Python 2.7", "Python 3.8"],
         supported_os=[SupportedOS.MacOS, SupportedOS.Windows, SupportedOS.Linux ],
     )
+    
+    async def create_go_tasking(self, taskData: PTTaskMessageAllData) -> PTTaskCreateTaskingMessageResponse:
+        response = PTTaskCreateTaskingMessageResponse(
+            TaskID=taskData.Task.ID,
+            Success=True,
+        )
+        
+        response.DisplayParams = "Polling {} for changes every {} seconds".format(taskData.args.get_arg("path"), str(taskData.args.get_arg("seconds")))
 
-    async def create_tasking(self, task: MythicTask) -> MythicTask:
-        task.display_params = "Polling {} for changes every {} seconds".format(task.args.get_arg("path"), str(task.args.get_arg("seconds")))
-        return task
+        return response
 
     async def process_response(self, task: PTTaskMessageAllData, response: any) -> PTTaskProcessResponseMessageResponse:
         resp = PTTaskProcessResponseMessageResponse(TaskID=task.Task.ID, Success=True)

@@ -40,11 +40,16 @@ class UnloadModuleCommand(CommandBase):
         supported_python_versions=["Python 2.7", "Python 3.8"],
         supported_os=[SupportedOS.MacOS, SupportedOS.Windows, SupportedOS.Linux ],
     )
+    
+    async def create_go_tasking(self, taskData: PTTaskMessageAllData) -> PTTaskCreateTaskingMessageResponse:
+        response = PTTaskCreateTaskingMessageResponse(
+            TaskID=taskData.Task.ID,
+            Success=True,
+        )
+        
+        response.DisplayParams = f"Unloading Python module: {taskData.args.get_arg('module_name')}"
 
-
-    async def create_tasking(self, task: MythicTask) -> MythicTask:        
-        task.display_params = f"Unloading {task.args.get_arg('module_name')} module"
-        return task
+        return response
 
     async def process_response(self, task: PTTaskMessageAllData, response: any) -> PTTaskProcessResponseMessageResponse:
         resp = PTTaskProcessResponseMessageResponse(TaskID=task.Task.ID, Success=True)

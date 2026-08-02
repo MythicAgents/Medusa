@@ -27,15 +27,17 @@ class GetClipboardCommand(CommandBase):
     argument_class = GetClipboardArguments
     attackmapping = [ "T1115" ]
     attributes = CommandAttributes(
-        filter_by_build_parameter={
-            "python_version": "Python 2.7"
-        },
-        supported_python_versions=["Python 2.7"],
+        supported_python_versions=["Python 2.7", "Python 3.8"],
         supported_os=[SupportedOS.MacOS],
     )
+    
+    async def create_go_tasking(self, taskData: MythicCommandBase.PTTaskMessageAllData) -> MythicCommandBase.PTTaskCreateTaskingMessageResponse:
+        response = MythicCommandBase.PTTaskCreateTaskingMessageResponse(
+            TaskID=taskData.Task.ID,
+            Success=True,
+        )
 
-    async def create_tasking(self, task: MythicTask) -> MythicTask:
-        return task
+        return response
 
     async def process_response(self, task: PTTaskMessageAllData, response: any) -> PTTaskProcessResponseMessageResponse:
         resp = PTTaskProcessResponseMessageResponse(TaskID=task.Task.ID, Success=True)

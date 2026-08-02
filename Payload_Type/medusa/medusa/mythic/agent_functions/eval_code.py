@@ -32,14 +32,19 @@ class EvalCommand(CommandBase):
     author = "@ajpc500"
     attackmapping = []
     argument_class = EvalArguments
+    browser_script = BrowserScript(script_name="eval_code", author="@rookuu", for_new_ui=True)
     attributes = CommandAttributes(
         supported_python_versions=["Python 2.7", "Python 3.8"],
         supported_os=[SupportedOS.MacOS, SupportedOS.Windows, SupportedOS.Linux ],
     )
 
-    async def create_tasking(self, task: MythicTask) -> MythicTask:
-        task.display_params = task.args.get_arg("command")
-        return task
+    async def create_go_tasking(self, taskData: MythicCommandBase.PTTaskMessageAllData) -> MythicCommandBase.PTTaskCreateTaskingMessageResponse:
+        response = MythicCommandBase.PTTaskCreateTaskingMessageResponse(
+            TaskID=taskData.Task.ID,
+            Success=True,
+        )
+
+        return response
 
     async def process_response(self, task: PTTaskMessageAllData, response: any) -> PTTaskProcessResponseMessageResponse:
         resp = PTTaskProcessResponseMessageResponse(TaskID=task.Task.ID, Success=True)
