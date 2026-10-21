@@ -57,6 +57,14 @@ class Medusa(PayloadType):
             description="Verify HTTPS certificate (if HTTP, leave yes)",
             choices=["Yes", "No"],
             default_value="Yes"
+        ),
+        BuildParameter(
+            name="target",
+            parameter_type=BuildParameterType.ChooseOne,
+            description=("Standard Python agent, or Pyodide (CPython in WASM; "
+                         "runs inside a backend Node.js host, HTTP via pyodide.http)"),
+            choices=["Standard Python", "Pyodide"],
+            default_value="Standard Python"
         )
     ]
 
@@ -64,6 +72,7 @@ class Medusa(PayloadType):
     agent_path = pathlib.Path(".") / "medusa" / "mythic"
     agent_icon_path = agent_path / "medusa.svg"
     agent_code_path = pathlib.Path(".") / "medusa" / "agent_code"
+    agent_code_override_path = None
 
     build_steps = [
         BuildStep(step_name="Gathering Files", step_description="Creating script payload"),
@@ -87,6 +96,36 @@ class Medusa(PayloadType):
             return ""
         else:
             return filename
+
+    def _target(self):
+        # Runtime mythic_container stores params in self.build_parameters, read
+        # via self.get_parameter() (returns None when missing); our test fakes
+        # instead expose a plain self._params dict and raise KeyError on missing.
+        try:
+            val = self.get_parameter("target")
+        except Exception:
+            val = getattr(self, "_params", {}).get("target", "Standard Python")
+        if val is None:
+            val = "Standard Python"
+        return val
+
+    def _resolve(self, directory, filename, strict_overlay=False):
+        """Pyodide overlay resolution: override tree first, stock tree second.
+
+        In pyodide mode (agent_code_override_path set), a file in the override tree
+        wins for the 12 async commands and the async base/transport; everything else
+        falls through to stock untouched. strict_overlay=True (base_agent only)
+        disables the fallback so a missing overlay hard-fails instead of silently
+        emitting a synchronous urllib payload.
+        """
+        override = self.agent_code_override_path
+        if override is not None:
+            p = self.getPythonVersionFile(os.path.join(override, directory), filename)
+            if p and os.path.exists(p):
+                return p
+            if strict_overlay:
+                return ""
+        return self.getPythonVersionFile(os.path.join(self.agent_code_path, directory), filename)
 
     def _read_file(self, path: str) -> str:
         with open(path, "r") as f:
@@ -170,8 +209,9 @@ class Medusa(PayloadType):
             )
 
     def _get_base_code_for_profile(self, profile_name: str) -> str:
-        base_path = self.getPythonVersionFile(os.path.join(self.agent_code_path, "base_agent"), "base_agent_core")
-        transport_path = self.getPythonVersionFile(os.path.join(self.agent_code_path, "base_agent"), f"transport_{profile_name}")
+        strict_overlay = self.agent_code_override_path is not None
+        base_path = self._resolve("base_agent", "base_agent_core", strict_overlay)
+        transport_path = self._resolve("base_agent", f"transport_{profile_name}", strict_overlay)
         if not base_path:
             raise ValueError("Missing base_agent_core template for selected python version")
         if not transport_path:
@@ -230,9 +270,18 @@ class Medusa(PayloadType):
         # create the payload
         build_msg = ""
         try:
+            self.agent_code_override_path = None
+            if self._target() == "Pyodide":
+                if self.get_parameter("python_version") != "Python 3.8":
+                    build_msg += "Pyodide target requires Python 3.8.\n"
+                    resp.set_status(BuildStatus.Error)
+                    resp.build_stderr = "Error building payload: " + build_msg
+                    return resp
+                self.agent_code_override_path = pathlib.Path(self.agent_code_path).parent / "agent_code_pyodide"
+
             command_code = ""
             for cmd in self.commands.get_commands():
-                command_path = self.getPythonVersionFile(self.agent_code_path, cmd)
+                command_path = self._resolve("", cmd)
                 if not command_path:
                     build_msg += "{} command not available for {}.\n".format(cmd, self.get_parameter("python_version"))
                 else:
@@ -252,6 +301,12 @@ class Medusa(PayloadType):
                 return resp
 
             profile_name = selected_c2.get_c2profile()["name"]
+            if self.agent_code_override_path is not None and profile_name != "http":
+                build_msg += "Pyodide target only supports the http C2 profile.\n"
+                resp.set_status(BuildStatus.Error)
+                resp.build_stderr = "Error building payload: " + build_msg
+                return resp
+
             base_code = self._get_base_code_for_profile(profile_name)
 
             if profile_name == "azure_blob":
@@ -300,10 +355,10 @@ class Medusa(PayloadType):
             base_code = self._apply_https_setting(base_code, profile_name)
 
 
-            if self.get_parameter("use_non_default_cryptography_lib") == "Yes":
-                crypto_code = self._read_file(self.getPythonVersionFile(os.path.join(self.agent_code_path, "base_agent"), "crypto_lib"))
-            else:
-                crypto_code = self._read_file(self.getPythonVersionFile(os.path.join(self.agent_code_path, "base_agent"), "manual_crypto"))
+            # Pyodide forces manual crypto: the 'cryptography' package is not importable in WASM.
+            use_crypto_lib = self.get_parameter("use_non_default_cryptography_lib") == "Yes" and self.agent_code_override_path is None
+            crypto_path = self._resolve("base_agent", "crypto_lib" if use_crypto_lib else "manual_crypto")
+            crypto_code = self._read_file(crypto_path)
 
             base_code = base_code.replace("CRYPTO_HERE", crypto_code)
             base_code = base_code.replace("UUID_HERE", self.uuid)
