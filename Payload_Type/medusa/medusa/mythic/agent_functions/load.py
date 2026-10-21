@@ -20,7 +20,7 @@ class LoadArguments(TaskArguments):
 
         callbacks = await SendMythicRPCCallbackSearch(MythicRPCCallbackSearchMessage(
             SearchCallbackID=inputMsg.Callback,
-            AgentCallbackID=inputMsg.Callback
+            CallbackID=inputMsg.Callback
         ))
         
         payload_os = ""
